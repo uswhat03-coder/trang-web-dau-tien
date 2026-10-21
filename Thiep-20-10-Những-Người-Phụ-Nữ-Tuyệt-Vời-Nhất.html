@@ -1,0 +1,2933 @@
+<!DOCTYPE html>
+<html lang="vi"><head><script data-bard-client-injected="true">(function(firebaseConfig, initialAuthToken, appId) {
+        window.__firebase_config = firebaseConfig;
+        window.__initial_auth_token = initialAuthToken;
+        window.__app_id = appId;
+            })("\n{\n  \"apiKey\": \"AIzaSyCqyCcs2R2e7AegGjvFAwG98wlamtbHvZY\",\n  \"authDomain\": \"bard-frontend.firebaseapp.com\",\n  \"projectId\": \"bard-frontend\",\n  \"storageBucket\": \"bard-frontend.firebasestorage.app\",\n  \"messagingSenderId\": \"175205271074\",\n  \"appId\": \"1:175205271074:web:2b7bd4d34d33bf38e6ec7b\"\n}\n","eyJhbGciOiJSUzI1NiIsImtpZCI6IjExNjRiNzdiNDMzZDdhMDAyMWI4NjE4YjhjYTU3ZTMyZGI5MWUxMTMiLCJ0eXAiOiJKV1QifQ.eyJzdWIiOiJmaXJlYmFzZS1hZG1pbnNkay1mYnN2Y0BiYXJkLWZyb250ZW5kLmlhbS5nc2VydmljZWFjY291bnQuY29tIiwiYXVkIjoiaHR0cHM6Ly9pZGVudGl0eXRvb2xraXQuZ29vZ2xlYXBpcy5jb20vZ29vZ2xlLmlkZW50aXR5LmlkZW50aXR5dG9vbGtpdC52MS5JZGVudGl0eVRvb2xraXQiLCJ1aWQiOiIxNzU3Njk0Mzg1OTA2NzE4ODE4MSIsImlzcyI6ImZpcmViYXNlLWFkbWluc2RrLWZic3ZjQGJhcmQtZnJvbnRlbmQuaWFtLmdzZXJ2aWNlYWNjb3VudC5jb20iLCJjbGFpbXMiOnsiYXBwSWQiOiJjX2JlNWY0Mjg4NTBjNDQ2MDVfaW5kZXguaHRtbC02MTAifSwiZXhwIjoxNzkyNjAwMDQ4LCJpYXQiOjE3OTI1OTY0NDgsImFsZyI6IlJTMjU2In0.cNHoAbTOR6GIl6Rl6VDvQyjN8jAB_pm1sLdlgc9KIWJZXfGONLZfYdTSHnUO7VQwsSHCNLAy-JIGKcgbYZhmyRHiLvPL_ZlDzl7PD_AdgYcC7-o8kdxCgH2Pdla_qyhI7zG5vlbtHUSC9uP562-q-xbf40abF-ExnqfABzi4A_lLpFiHrEdoQWqg9NX9opWRRJbt7mlUppDqNIugBuhGmvG49ytWoGGLv-gALWXMUbg0hDzhvxgScwOevGqvVCgbHNBiH6fE26rkhEfI49pu6ZQiEMWlr5J-YW7q8QnNycrK2HI1g8XsxAaOXKwFSPJVeQN8eVmWTHsZ_H5etNAfwQ","c_be5f428850c44605_index.html-610")</script><script data-bard-client-injected="true">
+  document.addEventListener('input', (event) => {
+    if (event.target && (event.target.isContentEditable || event.target.hasAttribute('contenteditable'))) {
+      const clonedDoc = document.cloneNode(true);
+      const injectedScripts = clonedDoc.querySelectorAll('[data-bard-client-injected="true"]');
+      injectedScripts.forEach(el => el.remove());
+      window.parent.postMessage({
+        type: 'inlineEdit',
+        html: '<!DOCTYPE html>\n' + clonedDoc.documentElement.outerHTML
+      }, '*');
+    }
+  });
+</script><script data-bard-client-injected="true">(function(){'use strict';window.addEventListener("message",a=>{a.data&&a.data.type==="SUPPLEMENTAL_DATA_UPDATE"&&window.dispatchEvent(new CustomEvent("supplementaldataupdate",{detail:a.data.data}))});}).call(this);
+</script><script data-bard-client-injected="true">(function() {
+  const SCROLL_KEYS = new Set([
+    'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight',
+    ' ', 'Spacebar', 'PageUp', 'PageDown', 'Home', 'End',
+  ]);
+  const HORIZONTAL_KEYS = new Set(['ArrowLeft', 'ArrowRight']);
+
+  function isTextEntryTarget(target) {
+    if (!target) return false;
+    const tagName = target.tagName;
+    return tagName === 'INPUT' || tagName === 'TEXTAREA' ||
+        tagName === 'SELECT' || target.isContentEditable === true;
+  }
+
+  // An element absorbs the key only if it both overflows on the axis being
+  // scrolled and is configured to scroll on that axis. The cheap dimension
+  // test runs first because getComputedStyle forces a style recalc, and this
+  // runs on every keypress. Each axis is read from its own longhand: the
+  // 'overflow' shorthand serializes as two values when the axes differ, which
+  // is the common 'overflow-x: hidden; overflow-y: auto' pane.
+  function canScroll(node, horizontal) {
+    const overflows = horizontal ? node.scrollWidth > node.clientWidth
+                                 : node.scrollHeight > node.clientHeight;
+    if (!overflows) return false;
+    const style = window.getComputedStyle(node);
+    const overflow = horizontal ? style.overflowX : style.overflowY;
+    return overflow === 'auto' || overflow === 'scroll';
+  }
+
+  // Walks up from the event target so nested scrollers keep their behavior.
+  // <body> is included because pages that pin the root height make it the
+  // scroll container.
+  function hasScrollableAncestor(target, horizontal) {
+    let node = target;
+    while (node && node !== document.documentElement) {
+      if (canScroll(node, horizontal)) return true;
+      node = node.parentElement;
+    }
+    return false;
+  }
+
+  function rootCanScroll(horizontal) {
+    const scroller = document.scrollingElement || document.documentElement;
+    if (!scroller) return false;
+    // Tolerate a pixel of rounding so subpixel layouts do not look scrollable.
+    return horizontal ? scroller.scrollWidth > window.innerWidth + 1
+                      : scroller.scrollHeight > window.innerHeight + 1;
+  }
+
+  window.addEventListener('keydown', function(event) {
+    if (!SCROLL_KEYS.has(event.key)) return;
+    if (event.defaultPrevented) return;
+    // Alt and Meta turn arrows into browser history navigation, and Ctrl is
+    // reserved for shortcuts, so none of them are scroll intent.
+    if (event.altKey || event.metaKey || event.ctrlKey) return;
+
+    const target = event.target;
+    if (isTextEntryTarget(target)) return;
+
+    // Anything that can still absorb the scroll gets to keep it.
+    const horizontal = HORIZONTAL_KEYS.has(event.key);
+    if (rootCanScroll(horizontal)) return;
+    if (hasScrollableAncestor(target, horizontal)) return;
+
+    event.preventDefault();
+  }, {capture: true, passive: false});
+})();</script><script data-bard-client-injected="true">(function() {
+  // Ensure this script is executed only once
+  if (window.firebaseAuthBridgeScriptLoaded) {
+    return;
+  }
+  window.firebaseAuthBridgeScriptLoaded = true;
+
+  let nextTokenPromiseId = 0;
+
+  // Stores { resolve, reject } for ongoing token requests
+  const pendingTokenPromises = {};
+
+  // Listen for messages from the Host Application
+  window.addEventListener('message', function(event) {
+
+    const messageData = event.data;
+
+  if (messageData && messageData.type === 'RESOLVE_NEW_FIREBASE_TOKEN') {
+      const { success, token, error, promiseId } = messageData ?? {};
+      if (pendingTokenPromises[promiseId]) {
+        if (success) {
+          pendingTokenPromises[promiseId].resolve(token);
+        } else {
+          pendingTokenPromises[promiseId].reject(new Error(error || 'Token refresh failed from host.'));
+        }
+        delete pendingTokenPromises[promiseId];
+      }
+    }
+  });
+
+  // Expose a function for the Generated App to request a new Firebase token
+  window.requestNewFirebaseToken = function() {
+    const currentPromiseId = nextTokenPromiseId++;
+    const promise = new Promise((resolve, reject) => {
+      pendingTokenPromises[currentPromiseId] = { resolve, reject };
+    });
+    if (window.parent && window.parent !== window) {
+      window.parent.postMessage({
+        type: 'REQUEST_NEW_FIREBASE_TOKEN',
+        promiseId: currentPromiseId
+      }, '*');
+    } else {
+      pendingTokenPromises[currentPromiseId].reject(new Error('No parent window to request token from.'));
+      delete pendingTokenPromises[currentPromiseId];
+    }
+    return promise;
+  };
+})();</script><script data-bard-client-injected="true">
+let realOriginalGetUserMedia = null;
+if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+  realOriginalGetUserMedia = navigator.mediaDevices.getUserMedia.bind(navigator.mediaDevices);
+}
+
+(function() {
+  if (navigator.mediaDevices && navigator.mediaDevices.__proto__) {
+    try {
+      Object.defineProperty(navigator.mediaDevices.__proto__, 'getUserMedia', {
+        get: function() {
+          return undefined; // Or throw an error
+        },
+        configurable: false
+      });
+    } catch (error) {
+      console.error("Error defining prototype getter:", error);
+    }
+  }
+})();
+
+(function() {
+  const pendingMediaResolvers = {};
+  let nextMediaPromiseId = 0;
+
+  function requestMediaPermissions(constraints) {
+    const mediaPromiseId = nextMediaPromiseId++;
+    const promise = new Promise((resolve, reject) => {
+      pendingMediaResolvers[mediaPromiseId] = (granted) => {
+        delete pendingMediaResolvers[mediaPromiseId];
+        resolve(granted);
+      };
+    });
+
+    window.parent.postMessage({
+      type: 'requestMediaPermission',
+      constraints: constraints,
+      promiseId: mediaPromiseId,
+    }, '*');
+
+    return promise;
+  }
+
+  let originalGetUserMedia = realOriginalGetUserMedia;
+
+  function interceptGetUserMedia() {
+    if (navigator.mediaDevices) {
+      Object.defineProperty(navigator.mediaDevices, 'getUserMedia', {
+        value: function(constraints) {
+          return requestMediaPermissions(constraints).then((granted) => {
+            if (granted) {
+              if (originalGetUserMedia) {
+                return originalGetUserMedia(constraints);
+              } else {
+                throw new Error("Original getUserMedia not available.");
+              }
+            } else {
+              throw new DOMException('Permission denied', 'NotAllowedError');
+            }
+          });
+        },
+        writable: false,
+        configurable: false
+      });
+    }
+  }
+
+  interceptGetUserMedia();
+
+  const observer = new MutationObserver(function(mutationsList, observer) {
+    for (const mutation of mutationsList) {
+      if (mutation.type === 'reconfigured' && mutation.name === 'getUserMedia' && mutation.object === navigator.mediaDevices) {
+        interceptGetUserMedia();
+      } else if (mutation.type === 'attributes' && mutation.attributeName === 'getUserMedia' && mutation.target === navigator.mediaDevices) {
+        interceptGetUserMedia();
+      } else if (mutation.type === 'childList' && mutation.addedNodes) {
+        mutation.addedNodes.forEach(node => {
+          if (node === navigator.mediaDevices) {
+            interceptGetUserMedia();
+          }
+        });
+      }
+    }
+  });
+
+  function interceptSpeechRecognition() {
+    if (!window.SpeechRecognition && !window.webkitSpeechRecognition) {
+      return;
+    }
+
+    const OriginalSpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    const SpeechRecognitionWrapper = function(...args) {
+      const recognizer = new OriginalSpeechRecognition(...args);
+      const originalStart = recognizer.start.bind(recognizer);
+
+      recognizer.start = function() {
+        requestMediaPermissions({ audio: true }).then(granted => {
+          if (granted) {
+            originalStart();
+          } else {
+            const errorEvent = new SpeechRecognitionErrorEvent('error');
+            errorEvent.error = 'not-allowed'; // This is the standard error for permission denial.
+            recognizer.dispatchEvent(errorEvent);
+          }
+        });
+      };
+
+      return recognizer;
+    };
+
+    SpeechRecognitionWrapper.prototype = OriginalSpeechRecognition.prototype;
+    SpeechRecognitionWrapper.prototype.constructor = SpeechRecognitionWrapper;
+
+    if (window.SpeechRecognition) {
+      window.SpeechRecognition = SpeechRecognitionWrapper;
+    }
+    if (window.webkitSpeechRecognition) {
+      window.webkitSpeechRecognition = SpeechRecognitionWrapper;
+    }
+  }
+
+  interceptSpeechRecognition();
+
+  window.addEventListener('message', function(event) {
+    if (event.data) {
+      if (event.data.type === 'resolveMediaPermission') {
+        const { promiseId, granted } = event.data;
+        if (pendingMediaResolvers[promiseId]) {
+          pendingMediaResolvers[promiseId](granted);
+        }
+      }
+    }
+  });
+
+})();</script><script ws-interception-config="{&quot;parentOrigin&quot;:&quot;https://gemini.google.com&quot;,&quot;proxiedDomains&quot;:[]}" data-bard-client-injected="true">(function(){'use strict';var u=typeof Object.defineProperties=="function"?Object.defineProperty:function(b,d,e){if(b==Array.prototype||b==Object.prototype)return b;b[d]=e.value;return b};function v(b){b=["object"==typeof globalThis&&globalThis,b,"object"==typeof window&&window,"object"==typeof self&&self,"object"==typeof global&&global];for(var d=0;d<b.length;++d){var e=b[d];if(e&&e.Math==Math)return e}throw Error("Cannot find global object");}var w=v(this);
+function y(b,d){if(d)a:{var e=w;b=b.split(".");for(var h=0;h<b.length-1;h++){var k=b[h];if(!(k in e))break a;e=e[k]}b=b[b.length-1];h=e[b];d=d(h);d!=h&&d!=null&&u(e,b,{configurable:!0,writable:!0,value:d})}}function z(b){function d(h){return b.next(h)}function e(h){return b.throw(h)}return new Promise(function(h,k){function m(n){n.done?h(n.value):Promise.resolve(n.value).then(d,e).then(m,k)}m(b.next())})}y("globalThis",function(b){return b||w});/*
+
+ Copyright The Closure Library Authors.
+ SPDX-License-Identifier: Apache-2.0
+*/
+function A(b,d){function e(){}e.prototype=d.prototype;b.j=d.prototype;b.prototype=new e;b.prototype.constructor=b;b.h=function(h,k,m){for(var n=Array(arguments.length-2),p=2;p<arguments.length;p++)n[p-2]=arguments[p];return d.prototype[k].apply(h,n)}};function B(b,d,e="*"){function h(a){if(typeof a==="string")return F.encode(a).buffer;if(a instanceof ArrayBuffer)return a.slice(0);if(ArrayBuffer.isView(a))return a.buffer.slice(a.byteOffset,a.byteOffset+a.byteLength);throw Error("Invalid data type");}function k(a){a=h(a);var f={type:"send",data:new Uint8Array(a)},g;(g=r)==null||g.postMessage(f,[a])}function m(){if(!r)throw Error("Data port not captured yet.");r.onmessage=a=>{if(a.data.type==="message"){a=new MessageEvent("message",{data:G.decode(a.data.data)});
+let f;(f=c.onmessage)==null||f.call(c,a);c.dispatchEvent(a)}}}function n(){if(!t)throw Error("Control port not captured yet.");t.onmessage=a=>{switch(a.data.type){case "open":l=1;var f=new Event("open"),g;(g=c.onopen)==null||g.call(c,f);c.dispatchEvent(f);q.forEach(H=>{k(H)});q=[];break;case "close":g=a.data;l=3;g=new CloseEvent("close",{code:g.code,reason:g.reason,wasClean:g.wasClean});(f=c.onclose)==null||f.call(c,g);c.dispatchEvent(g);break;case "error":l=3;f=new Event("error");let x;(x=c.onerror)==
+null||x.call(c,f);c.dispatchEvent(f)}}}function p(a){return z(function*(){var f=new MessageChannel;t=f.port1;var g=new MessageChannel;r=g.port1;n();m();window.parent.postMessage({type:"websocket_open",portOrdering:["control","data"],url:b,protocols:a||[],connectionId:I},e,[f.port2,g.port2])}())}var c=Reflect.construct(EventTarget,[],new.target);c.CONNECTING=0;c.OPEN=1;c.CLOSING=2;c.CLOSED=3;c.url=b;c.binaryType="arraybuffer";c.protocol="";c.i="";var l=0,t=null,r=null,q=[],F=new TextEncoder,G=new TextDecoder;
+c.onopen=null;c.onmessage=null;c.onclose=null;c.onerror=null;Object.defineProperty(c,"readyState",{get:()=>l,enumerable:!0,configurable:!0});Object.defineProperty(c,"bufferedAmount",{get:()=>{var a=0;q.forEach(f=>{a+=typeof f==="string"?f.length:f.byteLength});return a},enumerable:!0,configurable:!0});var I=function(){var a;return((a=globalThis.crypto)==null?0:a.randomUUID)?globalThis.crypto.randomUUID():"xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g,f=>{var g=Math.random()*16|0;return(f===
+"x"?g:g&3|8).toString(16)})}();c.send=a=>{if(l===1)a instanceof Blob?a.arrayBuffer().then(f=>{k(f)}):k(a);else if(l===0)if(typeof a==="string")q.push(a);else if(a instanceof ArrayBuffer||ArrayBuffer.isView(a))q.push(h(a));else throw Error("Sending Blob is not supported before the connection is open.");else console.debug("WebSocket send called in CLOSING or CLOSED state; ignored.")};c.close=(a=1E3,f="")=>{if(l!==2&&l!==3){l=2;a={type:"close",code:a,reason:f,wasClean:a===1E3};var g;(g=t)==null||g.postMessage(a)}};
+Promise.resolve().then(()=>p(d));return c}A(B,EventTarget);var C=document.currentScript,D=C==null?void 0:C.getAttribute("ws-interception-config");if(!D)throw Error("WebSocket Interceptor: Missing ws-interception-config attribute in the script tag.");var E=JSON.parse(D);if(!E.parentOrigin||typeof E.parentOrigin!=="string")throw Error("WebSocket Interceptor: Invalid parentOrigin in ws-interception-config");
+(function(b){var d=Object.getOwnPropertyDescriptor(window,"WebSocket");if(!d||d.writable||d.configurable)d=Object.assign(function(e,h){try{let k=(new URL(e)).hostname;if(b.proxiedDomains.some(m=>k===m||k.endsWith(`.${m}`)))return new B(e,h,b.parentOrigin)}catch(k){throw window.parent.postMessage({type:"websocket_blocked",url:e,reason:"blocked_invalid_url"},b.parentOrigin),new DOMException(`WebSocket connection to '${e}' is not allowed in Canvas.`,"SecurityError");}window.parent.postMessage({type:"websocket_blocked",
+url:e,reason:"blocked_domain_not_allowlisted"},b.parentOrigin);throw new DOMException(`WebSocket connection to '${e}' is not allowed in Canvas.`,"SecurityError");},{CONNECTING:0,OPEN:1,CLOSING:2,CLOSED:3}),Object.defineProperty(window,"WebSocket",{value:d,writable:!1,configurable:!1})})({proxiedDomains:E.proxiedDomains||[],parentOrigin:E.parentOrigin});}).call(this);
+</script><script data-bard-client-injected="true">((function(modelInformation) {
+  const originalFetch = window.fetch;
+  // TODO: b/421908508 - Move these out of the script and match all generative AI model calls.
+  let googleLlmBaseApiUrls = [
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.textModelName + ':streamGenerateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.textModelName + ':generateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageModelName + ':predict',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageModelName + ':predictLongRunning',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageEditModelName + ':generateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageTransformModelName + ':generateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.videoModelName + ':predict',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.videoModelName + ':predictLongRunning',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.ttsModelName + ':generateContent',
+  ];
+  modelInformation.deprecatedTextModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+    );
+  });
+  modelInformation.deprecatedImageModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':predict',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':predictLongRunning',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+    );
+  });
+  modelInformation.deprecatedGenerateImageModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+    );
+  });
+  modelInformation.deprecatedImageTransformModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+    );
+  });
+
+  const pendingFetchResolvers = {};
+  let nextPromiseId = 0;
+
+  function handleStringInput(input, optionsArgument) {
+    const actualUrl = input;
+    const fetchCallArgs = [actualUrl, optionsArgument];
+    const effectiveOptions = optionsArgument || {};
+    const bodyForApiKeyCheck = effectiveOptions.body;
+    const bodyForPostMessage = effectiveOptions.body;
+    return { actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage };
+  }
+
+  function handleRequestInput(input, optionsArgument) {
+    const actualUrl = input.url;
+    const fetchCallArgs = [input, optionsArgument];
+    const effectiveOptions = { method: input.method, headers: new Headers(input.headers) };
+    let bodyForApiKeyCheck;
+    let bodyForPostMessage;
+
+    if (optionsArgument) {
+      if (optionsArgument.method) effectiveOptions.method = optionsArgument.method;
+      if (optionsArgument.headers) effectiveOptions.headers = new Headers(optionsArgument.headers);
+      if ('body' in optionsArgument) {
+        bodyForApiKeyCheck = optionsArgument.body;
+        bodyForPostMessage = optionsArgument.body;
+      } else {
+        bodyForApiKeyCheck = undefined;
+        bodyForPostMessage = input.body;
+      }
+    } else {
+      bodyForApiKeyCheck = undefined;
+      bodyForPostMessage = input.body;
+    }
+    return { actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage };
+  }
+
+  window.fetch = function(input, optionsArgument) {
+    let actualUrl;
+    let fetchCallArgs;
+    let effectiveOptions = {};
+    let bodyForApiKeyCheck;
+    let bodyForPostMessage;
+
+    if (typeof input === 'string') {
+      ({actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage} = handleStringInput(input, optionsArgument));
+    } else if (input instanceof Request) {
+      ({actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage} = handleRequestInput(input, optionsArgument));
+    } else {
+      return originalFetch.apply(window, [input, optionsArgument]);
+    }
+
+    effectiveOptions.method = effectiveOptions.method || 'GET';
+    if (!effectiveOptions.headers) {
+      effectiveOptions.headers = new Headers();
+    }
+
+
+    if (typeof actualUrl === 'string' && googleLlmBaseApiUrls.some((url) => actualUrl.startsWith(url))) {
+      let apiKeyIsNull = true;
+
+      const regex = new RegExp("models/([^:]+)");
+      const modelNameMatch = actualUrl.match(regex);
+      const modelName = modelNameMatch ? modelNameMatch[1] : 'unspecified';
+
+
+      try {
+        const urlObject = new URL(actualUrl);  // Use URL object for robust parsing
+        const apiKeyParam = urlObject.searchParams.get('key');
+        if (apiKeyParam) {
+          apiKeyIsNull = false;
+        }
+      } catch (e) {
+        // Continue checks even if URL parsing fails
+      }
+
+      if (apiKeyIsNull && effectiveOptions.headers) {
+        const h = new Headers(effectiveOptions.headers);
+        const apiKeyHeaderValue = h.get('X-API-Key') || h.get('x-api-key');
+        if (apiKeyHeaderValue) {
+          apiKeyIsNull = false;
+          return originalFetch.apply(window, fetchCallArgs);
+        }
+      }
+
+      if (apiKeyIsNull && effectiveOptions.method && ['POST', 'PUT', 'PATCH'].includes(effectiveOptions.method.toUpperCase()) && typeof bodyForApiKeyCheck === 'string') {
+        try {
+          const bodyData = JSON.parse(bodyForApiKeyCheck);
+          if (bodyData && bodyData.apiKey) {
+            apiKeyIsNull = false;
+            return originalFetch.apply(window, fetchCallArgs);
+          }
+        } catch (e) {
+          // Ignore JSON parsing errors
+        }
+      }
+
+      if(apiKeyIsNull) {
+        const promiseId = nextPromiseId++;
+        const promise = new Promise((resolve) => {
+          pendingFetchResolvers[promiseId] = (resolvedResponse) => {
+            delete pendingFetchResolvers[promiseId];
+            resolve(resolvedResponse);
+          };
+        });
+
+        let serializedBodyForPostMessage;
+        if (typeof bodyForPostMessage === 'string' || bodyForPostMessage == null) {
+            serializedBodyForPostMessage = bodyForPostMessage;
+        } else if (bodyForPostMessage instanceof ReadableStream) {
+            serializedBodyForPostMessage = null;
+        } else {
+            try {
+                serializedBodyForPostMessage = JSON.stringify(bodyForPostMessage);
+            } catch (e) {
+                serializedBodyForPostMessage = null;
+            }
+        }
+
+        const messageOptions = {
+            method: effectiveOptions.method,
+            headers: Object.fromEntries(new Headers(effectiveOptions.headers).entries()),
+            body: serializedBodyForPostMessage
+        };
+
+        window.parent.postMessage({
+          type: 'requestFetch',
+          url: actualUrl,
+          modelName: modelName,
+          options: messageOptions,
+          promiseId: promiseId,
+        }, '*');
+
+        return promise;
+      }
+      return originalFetch.apply(window, fetchCallArgs);
+    }
+    return originalFetch.apply(window, fetchCallArgs);
+  };
+
+  window.addEventListener('message', function(event) {
+    if (event.data && event.data.type === 'resolveFetch') {
+      const { promiseId, response } = event.data;
+      if (pendingFetchResolvers[promiseId]) {
+        try {
+          const reconstructedResponse = new Response(response.body, {
+            status: response.status,
+            statusText: response.statusText,
+            headers: new Headers(response.headers),
+          });
+          pendingFetchResolvers[promiseId](reconstructedResponse);
+        } catch (error) {
+          pendingFetchResolvers[promiseId](new Response(null, { status: 500, statusText: "Interceptor Response Reconstruction Error" }));
+        }
+      }
+    }
+  });
+
+}))({"textModelName":"gemini-3-flash-preview","imageModelName":"imagen-4.0-generate-001","imageEditModelName":"gemini-3.1-flash-image","imageTransformModelName":"gemini-3-pro-image","videoModelName":"veo-2.0-generate-001","ttsModelName":"gemini-2.5-flash-preview-tts","deprecatedTextModelNames":["gemini-2.0-flash","gemini-2.5-flash","gemini-2.5-flash-preview-04-17","gemini-2.5-flash-preview-05-20","gemini-2.5-flash-preview-09-2025"],"deprecatedImageModelNames":["imagen-3.0-generate-001","imagen-3.0-generate-002"],"deprecatedGenerateImageModelNames":["gemini-2.5-flash-image-preview","gemini-2.5-flash-image","gemini-3.1-flash-image-preview"],"deprecatedImageTransformModelNames":["gemini-3-pro-image-preview-11-2025"]})</script><script data-bard-client-injected="true">(function(){'use strict';function a(){window.parent.postMessage({type:"interaction"},"*")}window.addEventListener("click",a,{capture:!0,passive:!0});window.addEventListener("touchstart",a,{capture:!0,passive:!0});window.addEventListener("keydown",a,{capture:!0,passive:!0});}).call(this);
+</script><script data-bard-client-injected="true">(function() {
+  const originalConsoleLog = console.log;
+  const originalConsoleError = console.error;
+
+    /**
+   * Normalizes an error event or a promise rejection reason into a structured error object.
+   * @param {*} errorEventOrReason The error object or reason.
+   * @return {object} Structured error data { message, name, stack }.
+   */
+  function getErrorObject(errorEventOrReason) {
+    if (errorEventOrReason instanceof Error) {
+      return {
+        message: errorEventOrReason.message,
+        name: errorEventOrReason.name,
+        stack: errorEventOrReason.stack,
+      };
+    }
+    // Fallback for non-Error objects.
+    try {
+      return {
+        message: JSON.stringify(errorEventOrReason),
+        name: 'UnknownErrorType',
+        stack: null,
+      };
+    } catch (e) {
+      return {
+        message: String(errorEventOrReason),
+        name: 'UnknownErrorTypeNonStringifiable',
+        stack: null,
+      };
+    }
+  }
+
+  /**
+   * Converts an array of arguments (from log/error) into a single string.
+   * Handles Error objects specially to include their message and stack.
+   * @param {Array<*>} args - Arguments passed to console methods.
+   * @return {string} A string representation of the arguments.
+   */
+  function stringifyArgs(args) {
+    return args
+      .map((arg) => {
+        if (arg instanceof Error) {
+          const {message, stack} = arg;
+          return `Error: ${message}${stack ? ('\nStack: ' + stack) : ''}`;
+        }
+        if (typeof arg === 'object' && arg !== null) {
+          try {
+            return JSON.stringify(arg);
+          } catch (error) {
+            return '[Circular Object]';
+          }
+        } else {
+          return String(arg);
+        }
+      })
+      .join(' ');
+  }
+
+  console.log = function(...args) {
+    const logString = stringifyArgs(args);
+    window.parent.postMessage({ type: 'log', message: logString }, '*');
+    originalConsoleLog.apply(console, args);
+  };
+
+  console.error = function(...args) {
+    let errorData;
+    if (args.length > 0 && args[0] instanceof Error) {
+      const err = args[0];
+      // If the first arg is an Error, capture its details.
+      errorData = {
+        type: 'error',
+        source: 'CONSOLE_ERROR',
+        ...getErrorObject(err),
+        rawArgsString: stringifyArgs(args.slice(1)),
+        timestamp: new Date().toISOString(),
+      };
+    } else {
+      // If not an Error object, treat all args as a general error message.
+      errorData = {
+        type: 'error',
+        source: 'CONSOLE_ERROR',
+        message: stringifyArgs(args),
+        name: 'ConsoleLoggedError',
+        stack: null,
+        timestamp: new Date().toISOString(),
+      };
+    }
+    window.parent.postMessage(errorData, '*');
+    originalConsoleError.apply(console, args);
+  };
+
+  // Listen for global unhandled synchronous errors.
+  window.addEventListener('error', function(event) {
+    const errorDetails = event.error ? getErrorObject(event.error) : {
+      message: event.message,
+      name: 'GlobalError',
+      stack: null,
+      filename: event.filename,
+      lineno: event.lineno,
+      colno: event.colno,
+    };
+
+    window.parent.postMessage({
+      type: 'error',
+      source: 'global',
+      ...errorDetails,
+      message: errorDetails.message || event.message,
+      timestamp: new Date().toISOString(),
+    }, '*');
+  });
+
+  // Listen for unhandled promise rejections (asynchronous errors).
+  window.addEventListener('unhandledrejection', function(event) {
+    const errorDetails = getErrorObject(event.reason);
+
+    window.parent.postMessage({
+      type: 'error',
+      source: 'unhandledrejection',
+      ...errorDetails,
+      message: errorDetails.message || 'Unhandled Promise Rejection',
+      timestamp: new Date().toISOString(),
+    }, '*');
+  });
+
+})();</script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Chúc Mừng Ngày Phụ Nữ Việt Nam 20/10 — Hành Trình Hoa Nở &amp; Thiệp Tri Ân</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts hỗ trợ tiếng Việt đầy đủ -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&amp;family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600&amp;family=Dancing+Script:wght@600;700&amp;display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-pink-1: #fff6f8;
+      --bg-pink-2: #fde8ef;
+      --bg-pink-3: #f9d5e2;
+      --rose-primary: #e87a9f;
+      --rose-deep: #c9527b;
+      --rose-soft: #f4abc4;
+      --gold-light: #fdf0c4;
+      --gold-mid: #e6be70;
+      --gold-deep: #c5963e;
+      --text-main: #4a2c38;
+      --text-muted: #845d6d;
+      --card-bg: rgba(255, 255, 255, 0.80);
+      --card-border: rgba(255, 255, 255, 0.94);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      font-family: 'Be Vietnam Pro', -apple-system, BlinkMacSystemFont, sans-serif;
+      color: var(--text-main);
+      background: radial-gradient(circle at 50% 18%, #ffffff 0%, var(--bg-pink-1) 38%, var(--bg-pink-2) 78%, var(--bg-pink-3) 100%);
+      position: relative;
+    }
+
+    @supports (height: 100dvh) {
+      html, body, .app-shell {
+        height: 100dvh;
+      }
+    }
+
+    /* Hào quang nền chuyển động dịu nhẹ */
+    .ambient-glow {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    .glow-orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(55px);
+      opacity: 0.62;
+      animation: floatOrb 14s ease-in-out infinite alternate;
+    }
+
+    .glow-orb-1 {
+      width: 340px;
+      height: 340px;
+      background: radial-gradient(circle, #ffd6e6 0%, rgba(255, 214, 230, 0) 70%);
+      top: -80px;
+      left: -60px;
+    }
+
+    .glow-orb-2 {
+      width: 390px;
+      height: 390px;
+      background: radial-gradient(circle, #fdf0c4 0%, rgba(253, 240, 196, 0) 70%);
+      bottom: -95px;
+      right: -75px;
+      animation-delay: -5s;
+    }
+
+    .glow-orb-3 {
+      width: 310px;
+      height: 310px;
+      background: radial-gradient(circle, #f4abc4 0%, rgba(244, 171, 196, 0) 70%);
+      top: 44%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      animation-delay: -9s;
+    }
+
+    @keyframes floatOrb {
+      0% { transform: translate(0, 0) scale(1); }
+      100% { transform: translate(26px, -28px) scale(1.12); }
+    }
+
+    /* Hai lớp Canvas cho cánh hoa nền và pháo hoa tương tác */
+    #bgCanvas, #fxCanvas {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    #bgCanvas { z-index: 1; }
+    #fxCanvas { z-index: 18; }
+
+    /* Lớp lóe sáng chuyển màn */
+    .flash-overlay {
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle, rgba(255,255,255,0.95) 0%, rgba(253,240,196,0.65) 45%, rgba(255,255,255,0) 80%);
+      opacity: 0;
+      pointer-events: none;
+      z-index: 16;
+      transition: opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .flash-overlay.active {
+      opacity: 1;
+    }
+
+    /* Khung giao diện chính */
+    .app-shell {
+      position: relative;
+      z-index: 10;
+      width: 100%;
+      max-width: 520px;
+      height: 100%;
+      margin: 0 auto;
+      padding: 12px 16px 14px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* Thanh điều hướng trên cùng */
+    .top-bar {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      padding: 2px 0;
+      z-index: 25;
+      flex-shrink: 0;
+    }
+
+    .date-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 6px 11px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.86);
+      border: 1px solid rgba(230, 190, 112, 0.55);
+      box-shadow: 0 4px 15px rgba(201, 82, 123, 0.12);
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--rose-deep);
+      backdrop-filter: blur(10px);
+      white-space: nowrap;
+    }
+
+    .date-badge svg {
+      width: 13px;
+      height: 13px;
+      color: var(--gold-deep);
+      flex-shrink: 0;
+    }
+
+    /* Thanh 3 bước: Phong Thư -> Vườn Hoa -> Vinh Danh */
+    .step-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.78);
+      border: 1px solid var(--card-border);
+      box-shadow: 0 4px 14px rgba(201, 82, 123, 0.1);
+      backdrop-filter: blur(10px);
+    }
+
+    .step-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-size: 0.67rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+      cursor: pointer;
+    }
+
+    .step-pill .step-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: rgba(201, 82, 123, 0.32);
+      transition: all 0.3s ease;
+    }
+
+    .step-pill.active {
+      background: linear-gradient(135deg, var(--rose-primary), var(--rose-deep));
+      color: #ffffff;
+      box-shadow: 0 3px 10px rgba(201, 82, 123, 0.32);
+    }
+
+    .step-pill.active .step-dot {
+      background: var(--gold-light);
+      box-shadow: 0 0 6px #ffffff;
+    }
+
+    .step-pill.done {
+      color: var(--rose-deep);
+      background: rgba(253, 240, 196, 0.75);
+    }
+
+    .step-pill.done .step-dot {
+      background: var(--gold-deep);
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .link-btn {
+      height: 34px;
+      padding: 0 11px;
+      border-radius: 999px;
+      border: 1px solid rgba(230, 190, 112, 0.65);
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.94), rgba(253, 232, 239, 0.94));
+      color: var(--rose-deep);
+      font-family: inherit;
+      font-size: 0.72rem;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(201, 82, 123, 0.12);
+      transition: transform 0.2s ease, background 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .link-btn:hover { transform: scale(1.04); background: #fff; }
+    .link-btn:active { transform: scale(0.96); }
+
+    .sound-btn {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      border: 1px solid rgba(230, 190, 112, 0.6);
+      background: rgba(255, 255, 255, 0.9);
+      color: var(--rose-deep);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(201, 82, 123, 0.12);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      flex-shrink: 0;
+    }
+
+    .sound-btn svg { width: 17px; height: 17px; }
+    .sound-btn.playing {
+      background: linear-gradient(135deg, #fff6f8, #fdf0c4);
+      border-color: var(--rose-primary);
+      box-shadow: 0 0 14px rgba(232, 122, 159, 0.42);
+    }
+
+    /* Sân khấu trung tâm chứa 3 Màn (Acts) */
+    .stage-wrapper {
+      flex: 1;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      min-height: 0;
+      padding: 4px 0;
+    }
+
+    .greeting-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 14px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.78);
+      border: 1px solid rgba(232, 122, 159, 0.34);
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 4px 12px rgba(201, 82, 123, 0.08);
+      max-width: 95%;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      flex-shrink: 0;
+    }
+
+    .greeting-pill strong {
+      color: var(--rose-deep);
+      font-weight: 700;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .act-screen {
+      display: none;
+      width: 100%;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      animation: actFadeIn 0.65s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    .act-screen.active {
+      display: flex;
+    }
+
+    @keyframes actFadeIn {
+      0% { opacity: 0; transform: translateY(18px) scale(0.96); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    /* ============================================================
+     * ACT 1: PHONG THƯ SÁP VÀNG 3D (INTERACTIVE ENVELOPE)
+     * ============================================================ */
+    .act1-intro-box {
+      text-align: center;
+      margin-bottom: 12px;
+      padding: 0 8px;
+    }
+
+    .act-subtitle-badge {
+      display: inline-block;
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--gold-deep);
+      background: linear-gradient(135deg, rgba(253, 240, 196, 0.85), rgba(253, 232, 239, 0.85));
+      padding: 4px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(230, 190, 112, 0.5);
+      margin-bottom: 6px;
+    }
+
+    .act-heading {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: clamp(1.65rem, 6vw, 2.15rem);
+      font-weight: 700;
+      color: var(--rose-deep);
+      line-height: 1.2;
+    }
+
+    .envelope-scene {
+      position: relative;
+      width: 310px;
+      height: 235px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      margin: 6px 0 14px;
+      perspective: 1000px;
+    }
+
+    .envelope-aura {
+      position: absolute;
+      inset: -12px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.9) 0%, rgba(244, 171, 196, 0.45) 55%, rgba(253, 240, 196, 0) 78%);
+      filter: blur(10px);
+      z-index: 0;
+      animation: pulseAura 3.2s ease-in-out infinite alternate;
+    }
+
+    @keyframes pulseAura {
+      0% { transform: scale(0.95); opacity: 0.75; }
+      100% { transform: scale(1.06); opacity: 1; }
+    }
+
+    .envelope-wrapper {
+      position: relative;
+      width: 290px;
+      height: 190px;
+      border-radius: 16px;
+      background: linear-gradient(160deg, #e87a9f 0%, #c9527b 100%);
+      box-shadow:
+        0 20px 45px rgba(168, 58, 96, 0.28),
+        0 0 0 2px rgba(255, 255, 255, 0.85);
+      z-index: 2;
+      transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .envelope-wrapper:not(.opened):hover {
+      transform: translateY(-4px);
+    }
+
+    /* Tấm thiệp bên trong phong thư */
+    .envelope-letter {
+      position: absolute;
+      left: 14px;
+      right: 14px;
+      bottom: 12px;
+      height: 172px;
+      background: linear-gradient(180deg, #ffffff 0%, #fff9fb 70%, #fdf3d7 100%);
+      border-radius: 14px;
+      border: 1.5px solid rgba(230, 190, 112, 0.65);
+      padding: 14px 14px 12px;
+      text-align: center;
+      box-shadow: 0 8px 25px rgba(120, 40, 70, 0.16);
+      z-index: 2;
+      transform: translateY(0);
+      transition: transform 0.85s cubic-bezier(0.22, 1, 0.36, 1) 0.25s, box-shadow 0.85s ease 0.25s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .envelope-wrapper.opened .envelope-letter {
+      transform: translateY(-58px);
+      box-shadow: 0 16px 36px rgba(175, 65, 105, 0.26);
+    }
+
+    .letter-Inner-border {
+      position: absolute;
+      inset: 6px;
+      border: 1px dashed rgba(230, 190, 112, 0.6);
+      border-radius: 10px;
+      pointer-events: none;
+    }
+
+    .letter-script-title {
+      font-family: 'Dancing Script', cursive;
+      font-size: 1.38rem;
+      font-weight: 700;
+      color: var(--rose-deep);
+      margin-bottom: 4px;
+    }
+
+    .letter-body-short {
+      font-size: 0.79rem;
+      line-height: 1.48;
+      color: var(--text-main);
+      max-width: 235px;
+    }
+
+    /* Các nếp gấp mặt trước phong thư */
+    .envelope-pocket {
+      position: absolute;
+      inset: 0;
+      z-index: 3;
+      pointer-events: none;
+      border-radius: 16px;
+      overflow: hidden;
+    }
+
+    .envelope-pocket svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    /* Nắp phong thư mở 3D */
+    .envelope-flap {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 112px;
+      z-index: 4;
+      transform-origin: top center;
+      transition: transform 0.75s cubic-bezier(0.4, 0, 0.2, 1), z-index 0s 0.35s;
+      pointer-events: none;
+    }
+
+    .envelope-flap svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+      filter: drop-shadow(0 6px 10px rgba(140, 42, 75, 0.2));
+    }
+
+    .envelope-wrapper.opened .envelope-flap {
+      transform: rotateX(180deg);
+      z-index: 1;
+    }
+
+    /* Con dấu sáp vàng tương tác */
+    .wax-seal-btn {
+      position: absolute;
+      top: 96px;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 68px;
+      height: 68px;
+      border-radius: 50%;
+      border: none;
+      background: radial-gradient(circle at 35% 30%, #fff5d6 0%, #e6be70 48%, #c5963e 88%, #9c7123 100%);
+      box-shadow:
+        0 8px 20px rgba(125, 45, 72, 0.35),
+        0 0 0 3px rgba(255, 255, 255, 0.78),
+        0 0 22px rgba(230, 190, 112, 0.85);
+      z-index: 5;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.4s ease;
+      animation: sealHeartbeat 2s ease-in-out infinite;
+    }
+
+    @keyframes sealHeartbeat {
+      0%, 100% { transform: translate(-50%, -50%) scale(1); }
+      50% { transform: translate(-50%, -50%) scale(1.08); }
+    }
+
+    .wax-seal-btn:hover {
+      transform: translate(-50%, -50%) scale(1.12);
+    }
+
+    .envelope-wrapper.opened .wax-seal-btn {
+      transform: translate(-50%, -50%) scale(1.65) rotate(25deg);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .act1-footer {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      min-height: 82px;
+      justify-content: center;
+    }
+
+    .seal-prompt {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--rose-deep);
+      background: rgba(255, 255, 255, 0.88);
+      padding: 8px 18px;
+      border-radius: 999px;
+      border: 1px solid rgba(232, 122, 159, 0.4);
+      box-shadow: 0 6px 18px rgba(201, 82, 123, 0.12);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--rose-primary);
+      animation: pulseRing 1.6s infinite;
+    }
+
+    @keyframes pulseRing {
+      0% { box-shadow: 0 0 0 0 rgba(232, 122, 159, 0.7); }
+      70% { box-shadow: 0 0 0 9px rgba(232, 122, 159, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(232, 122, 159, 0); }
+    }
+
+    .cta-gold-btn {
+      padding: 12px 24px;
+      border-radius: 999px;
+      border: 1.5px solid #ffffff;
+      background: linear-gradient(135deg, var(--rose-primary) 0%, var(--rose-deep) 55%, var(--gold-deep) 100%);
+      background-size: 160% auto;
+      color: #ffffff;
+      font-family: inherit;
+      font-size: 0.9rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow:
+        0 10px 25px rgba(201, 82, 123, 0.34),
+        0 0 0 3px rgba(253, 240, 196, 0.7);
+      transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.25s ease;
+      animation: popInBtn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+
+    .cta-gold-btn:hover {
+      transform: translateY(-2px) scale(1.03);
+      box-shadow: 0 14px 30px rgba(201, 82, 123, 0.42), 0 0 0 4px rgba(253, 240, 196, 0.9);
+    }
+
+    @keyframes popInBtn {
+      0% { opacity: 0; transform: scale(0.8) translateY(10px); }
+      100% { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    /* ============================================================
+     * ACT 2: ĐÁNH THỨC 3 ĐÓA HOA HẠNH PHÚC (BLOOMING BOUQUET)
+     * ============================================================ */
+    .wish-display-card {
+      width: 100%;
+      background: var(--card-bg);
+      border: 1.5px solid var(--card-border);
+      border-radius: 24px;
+      padding: 16px 18px 14px;
+      box-shadow:
+        0 16px 36px -10px rgba(190, 88, 125, 0.2),
+        0 0 0 1px rgba(230, 190, 112, 0.32) inset;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      text-align: center;
+      margin-bottom: 12px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .wish-display-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 15%;
+      right: 15%;
+      height: 3px;
+      border-radius: 0 0 6px 6px;
+      background: linear-gradient(90deg, transparent, var(--gold-mid), var(--rose-primary), var(--gold-mid), transparent);
+    }
+
+    .flower-Header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+
+    .flower-badge-tag {
+      font-size: 0.69rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.09em;
+      color: var(--gold-deep);
+      background: rgba(253, 240, 196, 0.85);
+      padding: 3px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(230, 190, 112, 0.5);
+    }
+
+    .bloom-counter-pill {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--rose-deep);
+      background: rgba(255, 255, 255, 0.9);
+      padding: 3px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(232, 122, 159, 0.35);
+    }
+
+    .wish-card-title {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.48rem;
+      font-weight: 700;
+      color: var(--rose-deep);
+      margin-bottom: 5px;
+      line-height: 1.2;
+    }
+
+    .wish-card-body {
+      font-size: 0.9rem;
+      line-height: 1.56;
+      color: var(--text-main);
+      min-height: 4.4em;
+      margin-bottom: 6px;
+    }
+
+    .wish-poetic-quote {
+      font-family: 'Dancing Script', cursive;
+      font-size: 1.18rem;
+      font-weight: 700;
+      color: var(--gold-deep);
+      min-height: 1.4em;
+    }
+
+    .word-span {
+      display: inline-block;
+      opacity: 0;
+      transform: translateY(6px);
+      transition: opacity 0.32s ease, transform 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+      margin-right: 0.24em;
+    }
+
+    .word-span.revealed {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Kệ 3 Đóa Hoa Tương Tác */
+    .bouquet-grid {
+      width: 100%;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .flower-node {
+      position: relative;
+      background: rgba(255, 255, 255, 0.68);
+      border: 1.5px solid rgba(255, 255, 255, 0.92);
+      border-radius: 22px;
+      padding: 10px 6px 9px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      cursor: pointer;
+      box-shadow: 0 8px 22px rgba(201, 82, 123, 0.12);
+      transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+      backdrop-filter: blur(10px);
+    }
+
+    .flower-node:hover {
+      transform: translateY(-4px);
+      background: rgba(255, 255, 255, 0.88);
+    }
+
+    .flower-node.selected {
+      border-color: var(--rose-primary);
+      box-shadow: 0 10px 26px rgba(232, 122, 159, 0.28), 0 0 0 2px rgba(232, 122, 159, 0.25);
+      background: rgba(255, 255, 255, 0.94);
+    }
+
+    .flower-node.bloomed {
+      border-color: var(--gold-mid);
+      background: linear-gradient(180deg, rgba(255,255,255,0.95) 0%, rgba(253,240,196,0.42) 100%);
+    }
+
+    .flower-svg-wrap {
+      position: relative;
+      width: 86px;
+      height: 86px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .flower-aura-ring {
+      position: absolute;
+      inset: 6px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(253, 240, 196, 0.75) 0%, rgba(244, 171, 196, 0.25) 65%, transparent 100%);
+      transition: transform 0.5s ease, opacity 0.5s ease;
+      animation: gentlePulse 2.4s ease-in-out infinite;
+    }
+
+    .flower-node.bloomed .flower-aura-ring {
+      background: radial-gradient(circle, rgba(253, 240, 196, 0.95) 0%, rgba(232, 122, 159, 0.45) 65%, transparent 100%);
+      transform: scale(1.16);
+    }
+
+    @keyframes gentlePulse {
+      0%, 100% { transform: scale(0.94); opacity: 0.7; }
+      50% { transform: scale(1.06); opacity: 1; }
+    }
+
+    .flower-svg {
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+      z-index: 2;
+      filter: drop-shadow(0 6px 12px rgba(185, 75, 112, 0.2));
+    }
+
+    /* Hoạt ảnh nở hoa SVG */
+    .f-petal-outer-l, .f-petal-outer-r, .f-petal-inner-l, .f-petal-inner-r, .f-core-gem, .f-pollen {
+      transition: transform 0.75s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.6s ease;
+    }
+
+    .f-petal-outer-l { transform-origin: 50px 70px; transform: rotate(18deg) scale(0.82); }
+    .f-petal-outer-r { transform-origin: 50px 70px; transform: rotate(-18deg) scale(0.82); }
+    .f-petal-inner-l { transform-origin: 50px 68px; transform: rotate(10deg) scale(0.88); }
+    .f-petal-inner-r { transform-origin: 50px 68px; transform: rotate(-10deg) scale(0.88); }
+    .f-core-gem { transform-origin: 50px 46px; transform: scale(0.5); opacity: 0.3; }
+    .f-pollen { transform-origin: 50px 45px; transform: scale(0.2); opacity: 0; }
+
+    .flower-node.bloomed .f-petal-outer-l { transform: rotate(-34deg) translateX(-4px) scale(1.04); }
+    .flower-node.bloomed .f-petal-outer-r { transform: rotate(34deg) translateX(4px) scale(1.04); }
+    .flower-node.bloomed .f-petal-inner-l { transform: rotate(-16deg) translateX(-2px) scale(1.02); }
+    .flower-node.bloomed .f-petal-inner-r { transform: rotate(16deg) translateX(2px) scale(1.02); }
+    .flower-node.bloomed .f-core-gem { transform: translateY(-6px) scale(1.15); opacity: 1; }
+    .flower-node.bloomed .f-pollen { transform: translateY(-8px) scale(1.1); opacity: 1; }
+
+    .flower-name {
+      font-size: 0.76rem;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-top: 4px;
+      text-align: center;
+      line-height: 1.2;
+    }
+
+    .flower-status {
+      font-size: 0.66rem;
+      font-weight: 600;
+      color: var(--rose-deep);
+      margin-top: 2px;
+      opacity: 0.85;
+    }
+
+    .flower-node.bloomed .flower-status {
+      color: var(--gold-deep);
+    }
+
+    /* ============================================================
+     * ACT 3: MÀN KẾT TÔN VINH & THIỆP LƯU NIỆM (GRAND FINALE)
+     * ============================================================ */
+    .finale-card {
+      width: 100%;
+      background: linear-gradient(165deg, rgba(255, 255, 255, 0.94) 0%, rgba(255, 246, 248, 0.91) 58%, rgba(253, 240, 196, 0.88) 100%);
+      border: 2px solid var(--card-border);
+      border-radius: 26px;
+      padding: 18px 18px 16px;
+      box-shadow:
+        0 22px 55px -12px rgba(201, 82, 123, 0.28),
+        0 0 0 1px rgba(230, 190, 112, 0.48) inset;
+      backdrop-filter: blur(20px);
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .finale-crown {
+      width: 54px;
+      height: 54px;
+      margin: 0 auto 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      background: radial-gradient(circle, #fffdf4 0%, #fde8ef 100%);
+      border: 1.5px solid rgba(230, 190, 112, 0.65);
+      box-shadow: 0 8px 20px rgba(230, 190, 112, 0.32);
+      animation: floatCrown 3s ease-in-out infinite;
+    }
+
+    @keyframes floatCrown {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-5px); }
+    }
+
+    .finale-label {
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--gold-deep);
+      margin-bottom: 4px;
+    }
+
+    .finale-headline {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: clamp(1.65rem, 6.2vw, 2.2rem);
+      font-weight: 700;
+      line-height: 1.16;
+      background: linear-gradient(135deg, #b83b66 0%, #e87a9f 35%, #c5963e 70%, #b83b66 100%);
+      background-size: 200% auto;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: shineText 4.5s linear infinite;
+      margin-bottom: 8px;
+    }
+
+    @keyframes shineText {
+      0% { background-position: 0% center; }
+      100% { background-position: 200% center; }
+    }
+
+    .recipient-dedication {
+      width: 100%;
+      margin: 0 auto 10px;
+      padding: 8px 14px;
+      border: 1px solid rgba(230, 190, 112, 0.58);
+      border-radius: 16px;
+      background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(253,232,239,0.88));
+      box-shadow: 0 4px 14px rgba(201, 82, 123, 0.08);
+    }
+
+    .recipient-label {
+      display: block;
+      color: var(--gold-deep);
+      font-size: 0.66rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .recipient-names {
+      font-family: 'Dancing Script', cursive;
+      color: var(--rose-deep);
+      font-size: 1.32rem;
+      font-weight: 700;
+      line-height: 1.3;
+      overflow-wrap: anywhere;
+    }
+
+    .finale-subwish {
+      font-size: 0.86rem;
+      line-height: 1.52;
+      color: var(--text-main);
+      margin-bottom: 10px;
+      padding: 0 4px;
+    }
+
+    /* Bộ chuyển đổi xem lại 3 lời chúc hoa */
+    .memory-tabs-box {
+      background: rgba(255, 255, 255, 0.78);
+      border: 1px solid rgba(230, 190, 112, 0.45);
+      border-radius: 16px;
+      padding: 9px 11px;
+      margin-bottom: 12px;
+      text-align: left;
+    }
+
+    .memory-tab-buttons {
+      display: flex;
+      gap: 5px;
+      margin-bottom: 7px;
+    }
+
+    .mem-tab-btn {
+      flex: 1;
+      padding: 5px 6px;
+      border-radius: 10px;
+      border: 1px solid rgba(232, 122, 159, 0.3);
+      background: rgba(255, 255, 255, 0.8);
+      font-family: inherit;
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-align: center;
+    }
+
+    .mem-tab-btn.active {
+      background: linear-gradient(135deg, var(--rose-primary), var(--rose-deep));
+      color: #fff;
+      border-color: transparent;
+      box-shadow: 0 3px 10px rgba(201, 82, 123, 0.25);
+    }
+
+    .memory-tab-content {
+      font-size: 0.78rem;
+      line-height: 1.45;
+      color: var(--text-main);
+      min-height: 2.8em;
+    }
+
+    .finale-actions {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      flex-wrap: wrap;
+    }
+
+    .btn-finale-action {
+      padding: 8px 13px;
+      border-radius: 999px;
+      font-family: inherit;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .btn-finale-action:hover { transform: translateY(-2px); }
+
+    .btn-firework {
+      border: 1.5px solid rgba(230, 190, 112, 0.75);
+      background: linear-gradient(135deg, #fffdf4 0%, #fde8ef 100%);
+      color: var(--rose-deep);
+      box-shadow: 0 5px 14px rgba(230, 190, 112, 0.25);
+    }
+
+    .btn-petal-rain {
+      border: 1.5px solid rgba(232, 122, 159, 0.55);
+      background: linear-gradient(135deg, #fff6f8 0%, #f9d5e2 100%);
+      color: var(--rose-deep);
+      box-shadow: 0 5px 14px rgba(232, 122, 159, 0.2);
+    }
+
+    .btn-replay {
+      border: none;
+      background: linear-gradient(135deg, var(--rose-primary) 0%, var(--rose-deep) 100%);
+      color: #ffffff;
+      box-shadow: 0 6px 16px rgba(201, 82, 123, 0.3);
+    }
+
+    /* Thanh phát nhạc cố định gọn gàng phía dưới */
+    .bottom-bar {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      z-index: 20;
+      flex-shrink: 0;
+    }
+
+    .music-pill-bar {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 6px 14px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.85);
+      border: 1px solid rgba(230, 190, 112, 0.55);
+      box-shadow: 0 6px 16px rgba(201, 82, 123, 0.12);
+      color: var(--rose-deep);
+      font-size: 0.74rem;
+      font-weight: 600;
+      cursor: pointer;
+      backdrop-filter: blur(10px);
+      transition: transform 0.2s ease, background 0.2s ease;
+    }
+
+    .music-pill-bar:hover {
+      transform: translateY(-1px);
+      background: #ffffff;
+    }
+
+    .music-equalizer {
+      display: flex;
+      align-items: flex-end;
+      gap: 2.5px;
+      height: 13px;
+    }
+
+    .eq-bar {
+      width: 2.5px;
+      height: 4px;
+      background: var(--rose-primary);
+      border-radius: 2px;
+      transition: height 0.2s ease;
+    }
+
+    .music-pill-bar.is-playing .eq-bar-1 { animation: eqBounce 0.65s ease-in-out infinite alternate; }
+    .music-pill-bar.is-playing .eq-bar-2 { animation: eqBounce 0.45s ease-in-out infinite alternate 0.15s; }
+    .music-pill-bar.is-playing .eq-bar-3 { animation: eqBounce 0.6s ease-in-out infinite alternate 0.3s; }
+
+    @keyframes eqBounce {
+      0% { height: 3px; }
+      100% { height: 13px; }
+    }
+
+    .bottom-caption {
+      font-size: 0.69rem;
+      color: var(--text-muted);
+      opacity: 0.86;
+      text-align: center;
+    }
+
+    /* Hộp thoại Tạo Link Mở Web & Tải File */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      background: rgba(74, 44, 56, 0.48);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+      animation: fadeInModal 0.25s ease forwards;
+    }
+
+    @keyframes fadeInModal {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .modal-panel {
+      width: 100%;
+      max-width: 440px;
+      max-height: 90vh;
+      overflow-y: auto;
+      background: #fffafa;
+      border: 2px solid #ffffff;
+      border-radius: 26px;
+      padding: 18px 18px 16px;
+      box-shadow: 0 24px 60px rgba(120, 45, 75, 0.28);
+      color: var(--text-main);
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+
+    .modal-title {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.42rem;
+      font-weight: 700;
+      color: var(--rose-deep);
+    }
+
+    .modal-close {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      border: 1px solid rgba(201, 82, 123, 0.25);
+      background: #fff;
+      color: var(--text-main);
+      font-size: 1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-section {
+      background: rgba(253, 232, 239, 0.55);
+      border: 1px solid rgba(232, 122, 159, 0.28);
+      border-radius: 16px;
+      padding: 11px 13px;
+      margin-bottom: 10px;
+      text-align: left;
+    }
+
+    .modal-section-title {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--rose-deep);
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .modal-section p {
+      font-size: 0.75rem;
+      line-height: 1.45;
+      color: var(--text-muted);
+    }
+
+    .modal-input {
+      width: 100%;
+      padding: 8px 11px;
+      margin-top: 6px;
+      border-radius: 11px;
+      border: 1px solid rgba(201, 82, 123, 0.35);
+      font-family: inherit;
+      font-size: 0.8rem;
+      color: var(--text-main);
+      background: #fff;
+      outline: none;
+      user-select: text;
+      -webkit-user-select: text;
+    }
+
+    .modal-input:focus {
+      border-color: var(--rose-deep);
+      box-shadow: 0 0 0 3px rgba(232, 122, 159, 0.18);
+    }
+
+    .modal-btn-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 9px;
+    }
+
+    .modal-action-btn {
+      flex: 1;
+      min-width: 130px;
+      padding: 9px 12px;
+      border-radius: 12px;
+      border: none;
+      font-family: inherit;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+    }
+
+    .modal-action-btn.primary {
+      background: linear-gradient(135deg, var(--rose-primary), var(--rose-deep));
+      color: #fff;
+      box-shadow: 0 6px 16px rgba(201, 82, 123, 0.25);
+    }
+
+    .modal-action-btn.secondary {
+      background: #fff;
+      color: var(--rose-deep);
+      border: 1.5px solid rgba(230, 190, 112, 0.75);
+    }
+
+    .toast-status {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #2c7a4b;
+      margin-top: 6px;
+      min-height: 16px;
+      text-align: center;
+    }
+
+    @media (max-height: 700px) {
+      .envelope-scene { height: 205px; margin: 2px 0 8px; }
+      .envelope-wrapper { height: 170px; width: 270px; }
+      .envelope-letter { height: 152px; padding: 10px; }
+      .flower-svg-wrap { width: 72px; height: 72px; }
+      .wish-display-card { padding: 12px 14px 10px; margin-bottom: 8px; }
+      .wish-card-body { font-size: 0.84rem; min-height: 3.6em; }
+      .finale-card { padding: 14px 14px 12px; }
+      .finale-crown { width: 44px; height: 44px; }
+    }
+  </style>
+<style>*, ::before, ::after{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/* ! tailwindcss v3.4.17 | MIT License | https://tailwindcss.com */*,::after,::before{box-sizing:border-box;border-width:0;border-style:solid;border-color:#e5e7eb}::after,::before{--tw-content:''}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;tab-size:4;font-family:ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0;padding:0}legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}</style></head>
+<body>
+
+  <!-- Lớp hào quang nền chuyển động -->
+  <div class="ambient-glow">
+    <div class="glow-orb glow-orb-1"></div>
+    <div class="glow-orb glow-orb-2"></div>
+    <div class="glow-orb glow-orb-3"></div>
+  </div>
+
+  <!-- Hai lớp Canvas: Cánh hoa rơi & bụi vàng (#bgCanvas) + Pháo hoa trái tim (#fxCanvas) -->
+  <canvas id="bgCanvas" width="1185" height="1035"></canvas>
+  <canvas id="fxCanvas" width="1185" height="1035"></canvas>
+
+  <!-- Lớp lóe sáng dịu khi chuyển màn -->
+  <div id="flashOverlay" class="flash-overlay"></div>
+
+  <!-- Khung ứng dụng chính -->
+  <main class="app-shell">
+    <!-- Thanh điều hướng trên cùng -->
+    <header class="top-bar">
+      <div class="date-badge" title="Tôn vinh Phụ nữ Việt Nam 20/10">
+        <svg viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 2L14.8 8.5L22 9.3L16.5 14L18.2 21L12 17.3L5.8 21L7.5 14L2 9.3L9.2 8.5L12 2Z"></path>
+        </svg>
+        <span>20/10 • Tôn Vinh Phái Đẹp</span>
+      </div>
+
+      <!-- Chỉ báo 3 bước -->
+      <nav class="step-indicator" aria-label="Hành trình 3 bước">
+        <div id="stepPill0" class="step-pill done" title="Bước 1: Mở Phong Thư">
+          <span class="step-dot"></span>
+          <span>Phong Thư</span>
+        </div>
+        <div id="stepPill1" class="step-pill done" title="Bước 2: Đánh Thức Vườn Hoa">
+          <span class="step-dot"></span>
+          <span>Vườn Hoa</span>
+        </div>
+        <div id="stepPill2" class="step-pill active" title="Bước 3: Thiệp Vinh Danh">
+          <span class="step-dot"></span>
+          <span>Vinh Danh</span>
+        </div>
+      </nav>
+
+      <div class="top-actions">
+        <button id="openModalBtn" class="link-btn" type="button" title="Tùy chỉnh tên người nhận &amp; tạo link">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+          </svg>
+          <span>Tạo Link</span>
+        </button>
+
+        <button id="soundToggleBtn" class="sound-btn playing" type="button" aria-label="Bật/Tắt nhạc nền" title="Bật/Tắt âm thanh">
+          <svg id="soundIconOn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: block;">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+            <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+            <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+          </svg>
+          <svg id="soundIconOff" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: none;">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+            <line x1="23" y1="9" x2="17" y2="15"></line>
+            <line x1="17" y1="9" x2="23" y2="15"></line>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Sân khấu chính -->
+    <section class="stage-wrapper">
+      <!-- Dòng chào người nhận -->
+      <div id="greetingPill" class="greeting-pill">
+        <span>Thương gửi:</span>
+        <strong id="topRecipientText">Những Người Phụ Nữ Tuyệt Vời Nhất</strong>
+      </div>
+
+      <!-- ======================================================
+           MÀN 1 (ACT 1): MỞ PHONG THƯ SÁP VÀNG 3D
+           ====================================================== -->
+      <div id="act1Screen" class="act-screen">
+        <div class="act1-intro-box">
+          <span class="act-subtitle-badge">Màn Mở Đầu • Thư Mời Tri Ân</span>
+          <h1 class="act-heading">Bức Thư Tháng Mười</h1>
+        </div>
+
+        <div class="envelope-scene">
+          <div class="envelope-aura"></div>
+
+          <div id="envelopeWrapper" class="envelope-wrapper opened">
+            <!-- Lá thư bên trong trượt lên khi mở -->
+            <div class="envelope-letter">
+              <div class="letter-Inner-border"></div>
+              <div class="letter-script-title">Chúc Mừng Ngày 20/10</div>
+              <p id="letterShortPreview" class="letter-body-short">
+                Một khu vườn ngập tràn sắc hoa và những lời chúc dịu dàng nhất đã được chuẩn bị dành riêng cho bạn.
+              </p>
+            </div>
+
+            <!-- Mặt túi phong thư trước -->
+            <div class="envelope-pocket">
+              <svg viewBox="0 0 290 190" preserveAspectRatio="none">
+                <defs>
+                  <linearGradient id="pocketGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stop-color="#f4abc4"></stop>
+                    <stop offset="100%" stop-color="#d86089"></stop>
+                  </linearGradient>
+                  <linearGradient id="sideFlapGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#f7bdd1"></stop>
+                    <stop offset="100%" stop-color="#e36d95"></stop>
+                  </linearGradient>
+                </defs>
+                <!-- Hai cánh bên phong thư -->
+                <polygon points="0,0 145,105 0,190" fill="url(#sideFlapGrad)"></polygon>
+                <polygon points="290,0 145,105 290,190" fill="url(#sideFlapGrad)"></polygon>
+                <!-- Nếp gấp dưới -->
+                <polygon points="0,190 145,92 290,190" fill="url(#pocketGrad)" stroke="#fdf0c4" stroke-width="1.2"></polygon>
+              </svg>
+            </div>
+
+            <!-- Nắp phong thư trên cùng mở 3D -->
+            <div class="envelope-flap">
+              <svg viewBox="0 0 290 112" preserveAspectRatio="none">
+                <defs>
+                  <linearGradient id="topFlapGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stop-color="#f9d5e2"></stop>
+                    <stop offset="100%" stop-color="#e87a9f"></stop>
+                  </linearGradient>
+                </defs>
+                <path d="M0,0 L145,104 L290,0 Z" fill="url(#topFlapGrad)" stroke="#fdf0c4" stroke-width="1.5"></path>
+              </svg>
+            </div>
+
+            <!-- Con dấu sáp vàng chạm để mở -->
+            <button id="waxSealBtn" type="button" class="wax-seal-btn" aria-label="Chạm vào dấu sáp vàng để mở bức thư">
+              <svg width="38" height="38" viewBox="0 0 40 40" fill="none">
+                <circle cx="20" cy="20" r="16" stroke="#fff6f8" stroke-width="1.2" stroke-dasharray="2 2"></circle>
+                <path d="M20 29C20 29 10 22.8 10 15.8C10 12.5 12.6 10 15.8 10C17.7 10 19.3 11 20 12.4C20.7 11 22.3 10 24.2 10C27.4 10 30 12.5 30 15.8C30 22.8 20 29 20 29Z" fill="#c9527b" stroke="#fff9e6" stroke-width="1.2"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="act1-footer">
+          <div id="sealPrompt" class="seal-prompt" style="display: none;">
+            <span class="pulse-dot"></span>
+            <span>Chạm vào dấu sáp vàng để mở bức thư 20/10</span>
+          </div>
+
+          <button id="toAct2Btn" type="button" class="cta-gold-btn" style="display: inline-flex;">
+            <span>Bước Vào Khu Vườn Tri Ân</span>
+            <span>✨</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- ======================================================
+           MÀN 2 (ACT 2): ĐÁNH THỨC 3 ĐÓA HOA HẠNH PHÚC
+           ====================================================== -->
+      <div id="act2Screen" class="act-screen">
+        <!-- Thẻ lời chúc tương ứng với từng đóa hoa -->
+        <article class="wish-display-card">
+          <div class="flower-Header-row">
+            <span id="flowerTag" class="flower-badge-tag">Đóa Hoa Thứ Ba • Sắc Vàng Viên Mãn</span>
+            <span id="bloomCounter" class="bloom-counter-pill">Đã đánh thức: 3/3 đóa hoa</span>
+          </div>
+          <h2 id="flowerTitle" class="wish-card-title">Đóa Mẫu Đơn Hạnh Phúc</h2>
+          <p id="flowerWishBody" class="wish-card-body"><span class="word-span revealed">Đóa</span><span class="word-span revealed">mẫu</span><span class="word-span revealed">đơn</span><span class="word-span revealed">vàng</span><span class="word-span revealed">ánh</span><span class="word-span revealed">kim</span><span class="word-span revealed">gửi</span><span class="word-span revealed">trao</span><span class="word-span revealed">lời</span><span class="word-span revealed">chúc</span><span class="word-span revealed">phú</span><span class="word-span revealed">quý,</span><span class="word-span revealed">thành</span><span class="word-span revealed">công</span><span class="word-span revealed">và</span><span class="word-span revealed">tình</span><span class="word-span revealed">yêu</span><span class="word-span revealed">viên</span><span class="word-span revealed">mãn.</span><span class="word-span revealed">Chúc</span><span class="word-span revealed">bạn</span><span class="word-span revealed">luôn</span><span class="word-span revealed">được</span><span class="word-span revealed">nâng</span><span class="word-span revealed">niu,</span><span class="word-span revealed">chiều</span><span class="word-span revealed">chuộng</span><span class="word-span revealed">và</span><span class="word-span revealed">gặt</span><span class="word-span revealed">hái</span><span class="word-span revealed">thật</span><span class="word-span revealed">nhiều</span><span class="word-span revealed">quả</span><span class="word-span revealed">ngọt</span><span class="word-span revealed">trên</span><span class="word-span revealed">hành</span><span class="word-span revealed">trình</span><span class="word-span revealed">cuộc</span><span class="word-span revealed">sống!</span></p>
+          <div id="flowerQuote" class="wish-poetic-quote">“Trọn đời được yêu thương, vạn sự đều như ý.”</div>
+        </article>
+
+        <!-- Lưới 3 đóa hoa kỳ diệu -->
+        <div class="bouquet-grid">
+          <!-- Hoa 1: Đóa Hồng Nhung -->
+          <div class="flower-node bloomed" id="flowerNode0" data-index="0" role="button" tabindex="0">
+            <div class="flower-svg-wrap">
+              <div class="flower-aura-ring"></div>
+              <svg class="flower-svg" viewBox="0 0 100 100">
+                <path d="M50 70 L50 92" stroke="#598f71" stroke-width="4" stroke-linecap="round"></path>
+                <path d="M50 83 C38 80, 32 72, 39 68 C45 65, 48 75, 50 83 Z" fill="#6ca384"></path>
+                <path d="M50 80 C62 77, 68 69, 61 65 C55 62, 52 72, 50 80 Z" fill="#7eb596"></path>
+                <!-- Cánh hoa ngoài -->
+                <g class="f-petal-outer-l">
+                  <path d="M50 70 C26 64, 22 38, 39 28 C46 37, 47 54, 50 70 Z" fill="#e87a9f" stroke="#fff" stroke-width="1"></path>
+                </g>
+                <g class="f-petal-outer-r">
+                  <path d="M50 70 C74 64, 78 38, 61 28 C54 37, 53 54, 50 70 Z" fill="#e87a9f" stroke="#fff" stroke-width="1"></path>
+                </g>
+                <!-- Cánh hoa trong -->
+                <g class="f-petal-inner-l">
+                  <path d="M50 68 C32 60, 32 34, 46 24 C51 36, 48 52, 50 68 Z" fill="#f4abc4" stroke="#fff" stroke-width="1"></path>
+                </g>
+                <g class="f-petal-inner-r">
+                  <path d="M50 68 C68 60, 68 34, 54 24 C49 36, 52 52, 50 68 Z" fill="#f4abc4" stroke="#fff" stroke-width="1"></path>
+                </g>
+                <!-- Nụ tâm & Nhụy vàng -->
+                <path d="M50 68 C38 56, 39 30, 50 20 C61 30, 62 56, 50 68 Z" fill="#c9527b" stroke="#fff" stroke-width="1.2"></path>
+                <g class="f-core-gem">
+                  <circle cx="50" cy="40" r="7" fill="#fdf0c4"></circle>
+                  <path d="M50 30 L52 38 L60 40 L52 42 L50 50 L48 42 L40 40 L48 38 Z" fill="#ffffff"></path>
+                </g>
+              </svg>
+            </div>
+            <div class="flower-name">Hồng Kiêu Sa</div>
+            <div class="flower-status" id="flowerStatus0">Đã nở rộ ✨</div>
+          </div>
+
+          <!-- Hoa 2: Đóa Sen Hồng -->
+          <div class="flower-node bloomed" id="flowerNode1" data-index="1" role="button" tabindex="0">
+            <div class="flower-svg-wrap">
+              <div class="flower-aura-ring"></div>
+              <svg class="flower-svg" viewBox="0 0 100 100">
+                <path d="M50 70 L50 92" stroke="#598f71" stroke-width="4" stroke-linecap="round"></path>
+                <ellipse cx="50" cy="76" rx="22" ry="6" fill="#76ad8e" opacity="0.85"></ellipse>
+                <!-- Cánh sen ngoài -->
+                <g class="f-petal-outer-l">
+                  <path d="M50 70 C24 62, 20 40, 36 28 C44 38, 46 54, 50 70 Z" fill="#f4abc4" stroke="#fff" stroke-width="1"></path>
+                </g>
+                <g class="f-petal-outer-r">
+                  <path d="M50 70 C76 62, 80 40, 64 28 C56 38, 54 54, 50 70 Z" fill="#f4abc4" stroke="#fff" stroke-width="1"></path>
+                </g>
+                <!-- Cánh sen trong -->
+                <g class="f-petal-inner-l">
+                  <path d="M50 68 C32 56, 34 32, 47 22 C52 36, 48 52, 50 68 Z" fill="#fde8ef" stroke="#e87a9f" stroke-width="1"></path>
+                </g>
+                <g class="f-petal-inner-r">
+                  <path d="M50 68 C68 56, 66 32, 53 22 C48 36, 52 52, 50 68 Z" fill="#fde8ef" stroke="#e87a9f" stroke-width="1"></path>
+                </g>
+                <!-- Búp sen giữa -->
+                <path d="M50 68 C39 54, 40 30, 50 18 C60 30, 61 54, 50 68 Z" fill="#e87a9f" stroke="#fff" stroke-width="1.2"></path>
+                <g class="f-core-gem">
+                  <circle cx="50" cy="42" r="8" fill="#e6be70"></circle>
+                  <circle cx="50" cy="42" r="4" fill="#fffdf5"></circle>
+                </g>
+              </svg>
+            </div>
+            <div class="flower-name">Sen Thanh Khiết</div>
+            <div class="flower-status" id="flowerStatus1">Đã nở rộ ✨</div>
+          </div>
+
+          <!-- Hoa 3: Đóa Mẫu Đơn Vàng -->
+          <div class="flower-node selected bloomed" id="flowerNode2" data-index="2" role="button" tabindex="0">
+            <div class="flower-svg-wrap">
+              <div class="flower-aura-ring"></div>
+              <svg class="flower-svg" viewBox="0 0 100 100">
+                <path d="M50 70 L50 92" stroke="#598f71" stroke-width="4" stroke-linecap="round"></path>
+                <path d="M50 82 C36 78, 32 70, 40 66 C46 64, 48 74, 50 82 Z" fill="#6ca384"></path>
+                <path d="M50 82 C64 78, 68 70, 60 66 C54 64, 52 74, 50 82 Z" fill="#6ca384"></path>
+                <!-- Cánh mẫu đơn ngoài -->
+                <g class="f-petal-outer-l">
+                  <path d="M50 70 C24 64, 22 36, 40 26 C48 36, 46 54, 50 70 Z" fill="#e6be70" stroke="#fff" stroke-width="1"></path>
+                </g>
+                <g class="f-petal-outer-r">
+                  <path d="M50 70 C76 64, 78 36, 60 26 C52 36, 54 54, 50 70 Z" fill="#e6be70" stroke="#fff" stroke-width="1"></path>
+                </g>
+                <!-- Cánh mẫu đơn trong -->
+                <g class="f-petal-inner-l">
+                  <path d="M50 68 C32 58, 32 32, 47 23 C52 35, 48 52, 50 68 Z" fill="#fdf0c4" stroke="#c5963e" stroke-width="1"></path>
+                </g>
+                <g class="f-petal-inner-r">
+                  <path d="M50 68 C68 58, 68 32, 53 23 C48 35, 52 52, 50 68 Z" fill="#fdf0c4" stroke="#c5963e" stroke-width="1"></path>
+                </g>
+                <!-- Tâm mẫu đơn -->
+                <path d="M50 68 C38 56, 39 30, 50 21 C61 30, 62 56, 50 68 Z" fill="#e87a9f" stroke="#fff" stroke-width="1.2"></path>
+                <g class="f-core-gem">
+                  <path d="M50 28 L53 37 L62 40 L53 43 L50 52 L47 43 L38 40 L47 37 Z" fill="#fffdf5"></path>
+                </g>
+              </svg>
+            </div>
+            <div class="flower-name">Mẫu Đơn Viên Mãn</div>
+            <div class="flower-status" id="flowerStatus2">Đã nở rộ ✨</div>
+          </div>
+        </div>
+
+        <!-- Nút sang màn Vinh Danh khi nở đủ 3 hoa -->
+        <div style="min-height: 50px; display: flex; align-items: center; justify-content: center;">
+          <button id="toAct3Btn" type="button" class="cta-gold-btn" style="display: inline-flex;">
+            <span>Mở Vương Miện Tôn Vinh 20/10</span>
+            <span>👑</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- ======================================================
+           MÀN 3 (ACT 3): MÀN KẾT TÔN VINH & THIỆP LƯU NIỆM
+           ====================================================== -->
+      <div id="act3Screen" class="act-screen active">
+        <div class="finale-card">
+          <div class="finale-crown">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+              <path d="M3 18H21M4 15L2 7L8 11L12 4L16 11L22 7L20 15H4Z" stroke="#c5963e" stroke-width="1.8" fill="rgba(253, 240, 196, 0.9)" stroke-linejoin="round"></path>
+              <circle cx="12" cy="4" r="1.5" fill="#c9527b"></circle>
+              <circle cx="2" cy="7" r="1.3" fill="#e87a9f"></circle>
+              <circle cx="22" cy="7" r="1.3" fill="#e87a9f"></circle>
+            </svg>
+          </div>
+
+          <div class="finale-label">Chúc Mừng Ngày Phụ Nữ Việt Nam 20/10</div>
+          <h2 class="finale-headline">Rạng Rỡ Như Hoa,<br>Dịu Dàng Như Nắng</h2>
+
+          <div class="recipient-dedication">
+            <span class="recipient-label" id="dedicationTitleLabel">Thương gửi lời chúc tốt đẹp nhất đến</span>
+            <div id="finaleRecipientNames" class="recipient-names">Những Người Phụ Nữ Tuyệt Vời Nhất</div>
+          </div>
+
+          <p id="finaleCustomWish" class="finale-subwish">Chúc một nửa thế giới luôn được yêu thương trọn vẹn, giữ mãi nụ cười tỏa nắng, tâm hồn bình yên và hạnh phúc ngập tràn trong từng khoảnh khắc.</p>
+
+          <!-- Khung xem lại 3 lời chúc từ 3 đóa hoa -->
+          <div class="memory-tabs-box">
+            <div class="memory-tab-buttons">
+              <button type="button" class="mem-tab-btn" data-mem="0">🌸 Hồng Kiêu Sa</button>
+              <button type="button" class="mem-tab-btn" data-mem="1">🪷 Sen Thanh Khiết</button>
+              <button type="button" class="mem-tab-btn active" data-mem="2">🌼 Mẫu Đơn Vàng</button>
+            </div>
+            <div id="memoryTabText" class="memory-tab-content"><strong>Hạnh Phúc &amp; Viên Mãn:</strong> Chúc bạn luôn được yêu thương, trân trọng như báu vật và gặt hái thật nhiều thành công rực rỡ.</div>
+          </div>
+
+          <div class="finale-actions">
+            <button id="btnFirework" type="button" class="btn-finale-action btn-firework">
+              <span>✨</span>
+              <span>Bắn Pháo Hoa Trái Tim</span>
+            </button>
+            <button id="btnPetalRain" type="button" class="btn-finale-action btn-petal-rain">
+              <span>🌸</span>
+              <span>Gửi Mưa Hoa Hồng</span>
+            </button>
+            <button id="btnReplay" type="button" class="btn-finale-action btn-replay">
+              <span>↻</span>
+              <span>Trải Nghiệm Lại</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Thanh điều khiển nhạc & chú thích cuối trang -->
+    <footer class="bottom-bar">
+      <button id="musicPillBtn" type="button" class="music-pill-bar is-playing">
+        <div class="music-equalizer" aria-hidden="true">
+          <span class="eq-bar eq-bar-1"></span>
+          <span class="eq-bar eq-bar-2"></span>
+          <span class="eq-bar eq-bar-3"></span>
+        </div>
+        <span id="musicPillText">Đang phát: Giai Điệu Yêu Thương 20/10</span>
+      </button>
+      <div class="bottom-caption">
+        Chạm nhẹ lên màn hình để tạo tia sáng lấp lánh • Thiết kế dành riêng cho ngày 20/10
+      </div>
+    </footer>
+  </main>
+
+  <!-- Hộp thoại Tùy chỉnh tên người nhận, lời chúc & Chia sẻ -->
+  <div id="shareModal" class="modal-backdrop open" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-panel">
+      <div class="modal-header">
+        <h3 id="modalTitle" class="modal-title">Tạo Thiệp 20/10 Mang Tên Riêng</h3>
+        <button id="closeModalBtn" type="button" class="modal-close" aria-label="Đóng">✕</button>
+      </div>
+
+      <div class="modal-section">
+        <div class="modal-section-title">
+          <span>🌷</span>
+          <span>1. Cá nhân hóa người nhận &amp; lời chúc</span>
+        </div>
+        <p>Nhập tên người nhận, người gửi và lời nhắn riêng để hiển thị trang trọng trên thiệp:</p>
+        <input id="inputRecipient" type="text" class="modal-input" placeholder="Người nhận (VD: Mẹ Yêu, Vợ Yêu, Chị Em Phòng Mình...)" maxlength="80">
+        <input id="inputSender" type="text" class="modal-input" placeholder="Người gửi (VD: Từ Anh / Con của Mẹ)" maxlength="60">
+        <input id="inputCustomWish" type="text" class="modal-input" placeholder="Lời chúc riêng ở màn cuối (tùy chọn)" maxlength="220">
+      </div>
+
+      <div class="modal-section">
+        <div class="modal-section-title">
+          <span>🔗</span>
+          <span>2. Sao chép Link hoặc Tải File Thiệp</span>
+        </div>
+        <p>Áp dụng ngay, sao chép đường dẫn mang tên người nhận hoặc tải về file HTML hoàn chỉnh để gửi tặng:</p>
+        <input id="generatedLinkInput" type="text" class="modal-input" readonly="">
+
+        <div class="modal-btn-row">
+          <button id="applyCustomBtn" type="button" class="modal-action-btn primary">
+            ✨ Áp Dụng &amp; Copy Link
+          </button>
+          <button id="downloadHtmlBtn" type="button" class="modal-action-btn secondary">
+            📥 Tải File HTML Riêng
+          </button>
+        </div>
+        <div id="toastStatus" class="toast-status"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /********************************************************************
+     * 1. DỮ LIỆU 3 ĐÓA HOA TRONG KHU VƯỜN TRI ÂN (ACT 2 & ACT 3)
+     ********************************************************************/
+    const FLOWERS_DATA = [
+      {
+        tag: "Đóa Hoa Thứ Nhất • Sắc Hồng Kiêu Sa",
+        title: "Đóa Hồng Nhung Rạng Rỡ",
+        wish: "Chúc bạn luôn giữ mãi nét thanh xuân tươi trẻ, nụ cười tỏa nắng và thần thái tự tin rạng ngời. Dù ở bất cứ nơi đâu, bạn vẫn luôn là đóa hoa kiêu hãnh và cuốn hút nhất!",
+        quote: "“Em là đóa hồng kiêu sa giữa nắng mai dịu dàng.”",
+        shortSummary: "<strong>Rạng Rỡ & Kiêu Sa:</strong> Chúc bạn luôn tươi trẻ, tự tin tỏa sáng với nụ cười rạng ngời và cuốn hút như đóa hồng ban mai."
+      },
+      {
+        tag: "Đóa Hoa Thứ Hai • Sắc Sen Thanh Khiết",
+        title: "Đóa Sen Hồng Dịu Dàng",
+        wish: "Cảm ơn sự dịu dàng, bao dung và trái tim ấm áp của bạn đã mang lại bình yên cho những người xung quanh. Chúc bạn thân tâm luôn an nhiên, sức khỏe dồi dào và mọi điều suôn sẻ!",
+        quote: "“Tâm an như sen nở, dịu dàng tựa ánh trăng.”",
+        shortSummary: "<strong>Dịu Dàng & Bình Yên:</strong> Chúc bạn thân tâm luôn an nhiên, sức khỏe dồi dào và ngập tràn những khoảng lặng bình yên, hạnh phúc."
+      },
+      {
+        tag: "Đóa Hoa Thứ Ba • Sắc Vàng Viên Mãn",
+        title: "Đóa Mẫu Đơn Hạnh Phúc",
+        wish: "Đóa mẫu đơn vàng ánh kim gửi trao lời chúc phú quý, thành công và tình yêu viên mãn. Chúc bạn luôn được nâng niu, chiều chuộng và gặt hái thật nhiều quả ngọt trên hành trình cuộc sống!",
+        quote: "“Trọn đời được yêu thương, vạn sự đều như ý.”",
+        shortSummary: "<strong>Hạnh Phúc & Viên Mãn:</strong> Chúc bạn luôn được yêu thương, trân trọng như báu vật và gặt hái thật nhiều thành công rực rỡ."
+      }
+    ];
+
+    /********************************************************************
+     * 2. BỘ PHÁT NHẠC WEB AUDIO SYNTHESIZER (PIANO & MUSIC BOX)
+     ********************************************************************/
+    class RomanticMusicBox {
+      constructor() {
+        this.ctx = null;
+        this.isPlaying = false;
+        this.isMuted = false;
+        this.stepIndex = 0;
+        this.timer = null;
+
+        // Giai điệu lãng mạn ấm áp dành cho ngày 20/10
+        this.sequence = [
+          { note: 523.25, bass: 261.63, dur: 0.52 },
+          { note: 659.25, bass: null,   dur: 0.52 },
+          { note: 783.99, bass: 392.00, dur: 0.52 },
+          { note: 987.77, bass: null,   dur: 0.52 },
+          { note: 880.00, bass: 349.23, dur: 0.52 },
+          { note: 698.46, bass: null,   dur: 0.52 },
+          { note: 783.99, bass: 329.63, dur: 0.80 },
+          { note: 659.25, bass: null,   dur: 0.45 },
+          { note: 587.33, bass: 293.66, dur: 0.52 },
+          { note: 698.46, bass: null,   dur: 0.52 },
+          { note: 659.25, bass: 329.63, dur: 0.52 },
+          { note: 523.25, bass: null,   dur: 0.52 },
+          { note: 587.33, bass: 392.00, dur: 0.62 },
+          { note: 783.99, bass: null,   dur: 0.52 },
+          { note: 523.25, bass: 261.63, dur: 1.05 }
+        ];
+      }
+
+      initContext() {
+        if (!this.ctx) {
+          const AudioCtx = window.AudioContext || window.webkitAudioContext;
+          if (AudioCtx) this.ctx = new AudioCtx();
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      }
+
+      playTone(freq, duration = 0.8, volume = 0.085, type = 'triangle') {
+        if (this.isMuted || !this.ctx || !freq) return;
+        try {
+          const now = this.ctx.currentTime;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = type;
+          osc.frequency.setValueAtTime(freq, now);
+
+          gain.gain.setValueAtTime(0.0001, now);
+          gain.gain.exponentialRampToValueAtTime(volume, now + 0.025);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now);
+          osc.stop(now + duration + 0.04);
+        } catch (e) {}
+      }
+
+      playChime(notes = [523.25, 659.25, 783.99, 1046.5]) {
+        this.initContext();
+        if (this.isMuted || !this.ctx) return;
+        notes.forEach((n, idx) => {
+          setTimeout(() => this.playTone(n, 0.95, 0.08, 'triangle'), idx * 70);
+        });
+      }
+
+      startBackgroundMusic() {
+        this.initContext();
+        if (this.isPlaying) return;
+        this.isPlaying = true;
+        this.isMuted = false;
+        this.scheduleNextNote();
+        updateMusicUI(true);
+      }
+
+      scheduleNextNote() {
+        if (!this.isPlaying) return;
+        const item = this.sequence[this.stepIndex % this.sequence.length];
+        if (!this.isMuted) {
+          this.playTone(item.note, item.dur * 1.85, 0.072, 'triangle');
+          if (item.bass) {
+            this.playTone(item.bass, item.dur * 2.3, 0.042, 'sine');
+          }
+        }
+        this.stepIndex++;
+        this.timer = setTimeout(() => this.scheduleNextNote(), item.dur * 1000);
+      }
+
+      stopBackgroundMusic() {
+        this.isPlaying = false;
+        if (this.timer) {
+          clearTimeout(this.timer);
+          this.timer = null;
+        }
+        updateMusicUI(false);
+      }
+
+      toggle() {
+        if (this.isPlaying) {
+          this.stopBackgroundMusic();
+        } else {
+          this.startBackgroundMusic();
+        }
+      }
+    }
+
+    const musicPlayer = new RomanticMusicBox();
+
+    function updateMusicUI(playing) {
+      const soundBtn = document.getElementById('soundToggleBtn');
+      const iconOn = document.getElementById('soundIconOn');
+      const iconOff = document.getElementById('soundIconOff');
+      const pillBtn = document.getElementById('musicPillBtn');
+      const pillText = document.getElementById('musicPillText');
+
+      if (playing) {
+        soundBtn.classList.add('playing');
+        iconOn.style.display = 'block';
+        iconOff.style.display = 'none';
+        pillBtn.classList.add('is-playing');
+        pillText.textContent = 'Đang phát: Giai Điệu Yêu Thương 20/10';
+      } else {
+        soundBtn.classList.remove('playing');
+        iconOn.style.display = 'none';
+        iconOff.style.display = 'block';
+        pillBtn.classList.remove('is-playing');
+        pillText.textContent = 'Bật Giai Điệu Piano & Music Box 20/10';
+      }
+    }
+
+    /********************************************************************
+     * 3. HỆ THỐNG CANVAS ĐÔI (CÁNH HOA RƠI & PHÁO HOA TRÁI TIM)
+     ********************************************************************/
+    const bgCanvas = document.getElementById('bgCanvas');
+    const bgCtx = bgCanvas.getContext('2d');
+    const fxCanvas = document.getElementById('fxCanvas');
+    const fxCtx = fxCanvas.getContext('2d');
+
+    let width = window.innerWidth;
+    let height = window.innerHeight;
+    let petalBoostUntil = 0;
+
+    function resizeCanvases() {
+      width = window.innerWidth;
+      height = window.innerHeight;
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+      [bgCanvas, fxCanvas].forEach(c => {
+        c.width = width * dpr;
+        c.height = height * dpr;
+        const ctx = c.getContext('2d');
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      });
+    }
+    window.addEventListener('resize', resizeCanvases);
+    resizeCanvases();
+
+    // Tạo danh sách cánh hoa rơi & hạt bụi vàng
+    const petals = Array.from({ length: 32 }, () => createPetal(true));
+
+    function createPetal(randomY = false) {
+      return {
+        x: Math.random() * width,
+        y: randomY ? Math.random() * height : -20 - Math.random() * 60,
+        size: 6 + Math.random() * 9,
+        speedY: 0.5 + Math.random() * 0.9,
+        speedX: -0.35 + Math.random() * 0.7,
+        angle: Math.random() * Math.PI * 2,
+        spin: (Math.random() - 0.5) * 0.025,
+        opacity: 0.38 + Math.random() * 0.45,
+        color: Math.random() > 0.28 ? '#f4abc4' : '#e6be70'
+      };
+    }
+
+    const particles = [];
+
+    function spawnBurst(x, y, count = 38, isHeart = false) {
+      const colors = ['#e87a9f', '#c9527b', '#f4abc4', '#e6be70', '#fdf0c4', '#ffffff'];
+      for (let i = 0; i < count; i++) {
+        let vx, vy;
+        if (isHeart) {
+          const t = (i / count) * Math.PI * 2;
+          const hx = 16 * Math.pow(Math.sin(t), 3);
+          const hy = -(13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t));
+          const scale = 0.17 + Math.random() * 0.08;
+          vx = hx * scale;
+          vy = hy * scale;
+        } else {
+          const angle = Math.random() * Math.PI * 2;
+          const speed = 1.4 + Math.random() * 5.0;
+          vx = Math.cos(angle) * speed;
+          vy = Math.sin(angle) * speed - 1.1;
+        }
+
+        particles.push({
+          x,
+          y,
+          vx,
+          vy,
+          size: 2.4 + Math.random() * 3.8,
+          alpha: 1,
+          decay: 0.014 + Math.random() * 0.014,
+          color: colors[Math.floor(Math.random() * colors.length)]
+        });
+      }
+    }
+
+    function triggerPetalRain() {
+      petalBoostUntil = performance.now() + 4500;
+      for (let i = 0; i < 18; i++) {
+        if (petals.length < 70) {
+          petals.push(createPetal(false));
+        }
+      }
+      spawnBurst(width * 0.3, height * 0.25, 28, false);
+      spawnBurst(width * 0.7, height * 0.25, 28, false);
+    }
+
+    function renderLoop(now) {
+      bgCtx.clearRect(0, 0, width, height);
+      const boostFactor = now < petalBoostUntil ? 2.1 : 1;
+
+      petals.forEach((p, idx) => {
+        p.y += p.speedY * boostFactor;
+        p.x += p.speedX + Math.sin(p.angle) * 0.35;
+        p.angle += p.spin;
+
+        if (p.y > height + 20) {
+          if (petals.length > 32 && now >= petalBoostUntil) {
+            petals.splice(idx, 1);
+            return;
+          }
+          p.y = -15;
+          p.x = Math.random() * width;
+        }
+        if (p.x > width + 20) p.x = -15;
+        if (p.x < -20) p.x = width + 15;
+
+        bgCtx.save();
+        bgCtx.translate(p.x, p.y);
+        bgCtx.rotate(p.angle);
+        bgCtx.globalAlpha = p.opacity;
+        bgCtx.fillStyle = p.color;
+        bgCtx.beginPath();
+        bgCtx.moveTo(0, -p.size * 0.6);
+        bgCtx.bezierCurveTo(p.size * 0.8, -p.size * 0.6, p.size * 0.8, p.size * 0.6, 0, p.size * 0.8);
+        bgCtx.bezierCurveTo(-p.size * 0.8, p.size * 0.6, -p.size * 0.8, -p.size * 0.6, 0, -p.size * 0.6);
+        bgCtx.fill();
+        bgCtx.restore();
+      });
+
+      fxCtx.clearRect(0, 0, width, height);
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const pt = particles[i];
+        pt.x += pt.vx;
+        pt.y += pt.vy;
+        pt.vy += 0.058;
+        pt.vx *= 0.985;
+        pt.alpha -= pt.decay;
+
+        if (pt.alpha <= 0) {
+          particles.splice(i, 1);
+          continue;
+        }
+
+        fxCtx.save();
+        fxCtx.globalAlpha = Math.max(0, pt.alpha);
+        fxCtx.fillStyle = pt.color;
+        fxCtx.shadowColor = pt.color;
+        fxCtx.shadowBlur = 7;
+        fxCtx.beginPath();
+        fxCtx.arc(pt.x, pt.y, pt.size, 0, Math.PI * 2);
+        fxCtx.fill();
+        fxCtx.restore();
+      }
+
+      requestAnimationFrame(renderLoop);
+    }
+
+    /********************************************************************
+     * 4. LOGIC ĐIỀU KHIỂN 3 MÀN TƯƠNG TÁC (ACT 1 -> ACT 2 -> ACT 3)
+     ********************************************************************/
+    let currentAct = 0; // 0: Phong Thư, 1: Vườn Hoa, 2: Vinh Danh
+    let envelopeOpened = false;
+    const bloomedSet = new Set();
+    let wordTimers = [];
+
+    const actScreens = [
+      document.getElementById('act1Screen'),
+      document.getElementById('act2Screen'),
+      document.getElementById('act3Screen')
+    ];
+    const stepPills = [
+      document.getElementById('stepPill0'),
+      document.getElementById('stepPill1'),
+      document.getElementById('stepPill2')
+    ];
+
+    const envelopeWrapper = document.getElementById('envelopeWrapper');
+    const waxSealBtn = document.getElementById('waxSealBtn');
+    const sealPrompt = document.getElementById('sealPrompt');
+    const toAct2Btn = document.getElementById('toAct2Btn');
+    const toAct3Btn = document.getElementById('toAct3Btn');
+    const flashOverlay = document.getElementById('flashOverlay');
+
+    const flowerTag = document.getElementById('flowerTag');
+    const bloomCounter = document.getElementById('bloomCounter');
+    const flowerTitle = document.getElementById('flowerTitle');
+    const flowerWishBody = document.getElementById('flowerWishBody');
+    const flowerQuote = document.getElementById('flowerQuote');
+
+    function triggerFlash() {
+      flashOverlay.classList.add('active');
+      setTimeout(() => flashOverlay.classList.remove('active'), 550);
+    }
+
+    function switchAct(actIndex) {
+      currentAct = actIndex;
+      actScreens.forEach((sc, idx) => {
+        sc.classList.toggle('active', idx === actIndex);
+      });
+      stepPills.forEach((pill, idx) => {
+        pill.classList.remove('active', 'done');
+        if (idx === actIndex) pill.classList.add('active');
+        else if (idx < actIndex) pill.classList.add('done');
+      });
+
+      if (actIndex === 1 && bloomedSet.size === 0) {
+        revealWordsInElement(
+          flowerWishBody,
+          "Hãy chạm nhẹ vào từng nụ hoa bên dưới để đánh thức 3 đóa hoa hạnh phúc và mở khóa những lời chúc 20/10 dịu dàng nhất dành tặng bạn."
+        );
+      }
+
+      if (actIndex === 2) {
+        triggerFlash();
+        musicPlayer.playChime([523.25, 659.25, 783.99, 1046.5, 1318.5]);
+        spawnBurst(width * 0.5, height * 0.3, 65, true);
+        setTimeout(() => spawnBurst(width * 0.25, height * 0.42, 42, false), 320);
+        setTimeout(() => spawnBurst(width * 0.75, height * 0.42, 42, false), 600);
+      }
+    }
+
+    // Cho phép nhấn vào thanh bước ở trên để chuyển nhanh nếu đã mở
+    stepPills.forEach((pill, idx) => {
+      pill.addEventListener('click', () => {
+        if (idx === 0 || (idx === 1 && envelopeOpened) || (idx === 2 && bloomedSet.size === 3)) {
+          switchAct(idx);
+        }
+      });
+    });
+
+    function revealWordsInElement(container, text) {
+      wordTimers.forEach(t => clearTimeout(t));
+      wordTimers = [];
+      container.innerHTML = '';
+
+      const words = text.split(' ');
+      words.forEach((w, idx) => {
+        const span = document.createElement('span');
+        span.className = 'word-span';
+        span.textContent = w;
+        container.appendChild(span);
+
+        const t = setTimeout(() => {
+          span.classList.add('revealed');
+        }, 30 + idx * 32);
+        wordTimers.push(t);
+      });
+    }
+
+    // Xử lý Màn 1: Chạm mở dấu sáp vàng
+    function openEnvelope() {
+      if (envelopeOpened) return;
+      envelopeOpened = true;
+
+      if (!musicPlayer.isPlaying && !musicPlayer.isMuted) {
+        musicPlayer.startBackgroundMusic();
+      } else {
+        musicPlayer.initContext();
+      }
+      musicPlayer.playChime([523.25, 659.25, 783.99, 987.77]);
+
+      envelopeWrapper.classList.add('opened');
+      sealPrompt.style.display = 'none';
+
+      const rect = waxSealBtn.getBoundingClientRect();
+      spawnBurst(rect.left + rect.width / 2, rect.top + rect.height / 2, 48, true);
+
+      setTimeout(() => {
+        toAct2Btn.style.display = 'inline-flex';
+      }, 650);
+    }
+
+    waxSealBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      openEnvelope();
+    });
+    envelopeWrapper.addEventListener('click', () => {
+      if (!envelopeOpened) openEnvelope();
+    });
+
+    toAct2Btn.addEventListener('click', () => {
+      musicPlayer.playChime([587.33, 783.99, 987.77]);
+      switchAct(1);
+    });
+
+    // Xử lý Màn 2: Đánh thức 3 đóa hoa
+    const flowerNodes = [
+      document.getElementById('flowerNode0'),
+      document.getElementById('flowerNode1'),
+      document.getElementById('flowerNode2')
+    ];
+
+    function activateFlower(index) {
+      const data = FLOWERS_DATA[index];
+      const node = flowerNodes[index];
+      const isNewBloom = !bloomedSet.has(index);
+
+      bloomedSet.add(index);
+      flowerNodes.forEach((n, i) => n.classList.toggle('selected', i === index));
+      node.classList.add('bloomed');
+
+      const statusEl = document.getElementById(`flowerStatus${index}`);
+      statusEl.textContent = 'Đã nở rộ ✨';
+
+      flowerTag.textContent = data.tag;
+      flowerTitle.textContent = data.title;
+      flowerQuote.textContent = data.quote;
+      bloomCounter.textContent = `Đã đánh thức: ${bloomedSet.size}/3 đóa hoa`;
+
+      revealWordsInElement(flowerWishBody, data.wish);
+
+      // Tạo hiệu ứng hạt phấn hoa vàng bay lên từ đóa hoa
+      const rect = node.getBoundingClientRect();
+      spawnBurst(rect.left + rect.width / 2, rect.top + rect.height * 0.4, isNewBloom ? 42 : 20, isNewBloom);
+
+      if (isNewBloom) {
+        const chords = [
+          [523.25, 659.25, 783.99],
+          [587.33, 739.99, 880.00],
+          [659.25, 830.61, 987.77]
+        ];
+        musicPlayer.playChime(chords[index]);
+      }
+
+      if (bloomedSet.size === 3) {
+        toAct3Btn.style.display = 'inline-flex';
+      }
+    }
+
+    flowerNodes.forEach((node, idx) => {
+      node.addEventListener('click', () => activateFlower(idx));
+      node.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          activateFlower(idx);
+        }
+      });
+    });
+
+    toAct3Btn.addEventListener('click', () => {
+      switchAct(2);
+    });
+
+    // Xử lý Màn 3: Xem lại 3 tab kỷ niệm & Nút tương tác
+    const memTabBtns = document.querySelectorAll('.mem-tab-btn');
+    const memoryTabText = document.getElementById('memoryTabText');
+
+    memTabBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const idx = Number(btn.getAttribute('data-mem'));
+        memTabBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        memoryTabText.innerHTML = FLOWERS_DATA[idx].shortSummary;
+        musicPlayer.playTone(659.25 + idx * 110, 0.35, 0.05, 'triangle');
+      });
+    });
+
+    document.getElementById('btnFirework').addEventListener('click', () => {
+      musicPlayer.playChime([523.25, 659.25, 783.99, 1046.5]);
+      const rx = width * (0.2 + Math.random() * 0.6);
+      const ry = height * (0.2 + Math.random() * 0.38);
+      spawnBurst(rx, ry, 65, true);
+    });
+
+    document.getElementById('btnPetalRain').addEventListener('click', () => {
+      musicPlayer.playChime([659.25, 783.99, 987.77, 1174.66]);
+      triggerPetalRain();
+    });
+
+    document.getElementById('btnReplay').addEventListener('click', () => {
+      envelopeOpened = false;
+      envelopeWrapper.classList.remove('opened');
+      sealPrompt.style.display = 'inline-flex';
+      toAct2Btn.style.display = 'none';
+      toAct3Btn.style.display = 'none';
+      bloomedSet.clear();
+
+      flowerNodes.forEach((n, i) => {
+        n.classList.remove('bloomed', 'selected');
+        const icons = ['🌸', '🪷', '🌼'];
+        document.getElementById(`flowerStatus${i}`).textContent = `Chạm để nở ${icons[i]}`;
+      });
+      bloomCounter.textContent = 'Đã đánh thức: 0/3 đóa hoa';
+      flowerTag.textContent = 'Khu Vườn Tri Ân';
+      flowerTitle.textContent = 'Chạm Vào Từng Nụ Hoa';
+      flowerQuote.textContent = '“Mỗi đóa hoa nở là một lời chúc gửi trao...”';
+
+      switchAct(0);
+    });
+
+    // Chạm nhẹ lên màn hình tạo hạt lấp lánh
+    window.addEventListener('pointerdown', (e) => {
+      if (!e.target.closest('.modal-panel') && !e.target.closest('button')) {
+        spawnBurst(e.clientX, e.clientY, 10, false);
+      }
+    });
+
+    document.getElementById('soundToggleBtn').addEventListener('click', () => musicPlayer.toggle());
+    document.getElementById('musicPillBtn').addEventListener('click', () => musicPlayer.toggle());
+
+    /********************************************************************
+     * 5. TÙY CHỈNH TÊN NGƯỜI NHẬN, LỜI CHÚC & TẠO LINK / TẢI FILE
+     ********************************************************************/
+    const shareModal = document.getElementById('shareModal');
+    const openModalBtn = document.getElementById('openModalBtn');
+    const closeModalBtn = document.getElementById('closeModalBtn');
+    const inputRecipient = document.getElementById('inputRecipient');
+    const inputSender = document.getElementById('inputSender');
+    const inputCustomWish = document.getElementById('inputCustomWish');
+    const generatedLinkInput = document.getElementById('generatedLinkInput');
+    const applyCustomBtn = document.getElementById('applyCustomBtn');
+    const downloadHtmlBtn = document.getElementById('downloadHtmlBtn');
+    const toastStatus = document.getElementById('toastStatus');
+
+    const topRecipientText = document.getElementById('topRecipientText');
+    const finaleRecipientNames = document.getElementById('finaleRecipientNames');
+    const dedicationTitleLabel = document.getElementById('dedicationTitleLabel');
+    const finaleCustomWish = document.getElementById('finaleCustomWish');
+
+    const DEFAULT_RECIPIENT = "Những Người Phụ Nữ Tuyệt Vời Nhất";
+    const DEFAULT_WISH = "Chúc một nửa thế giới luôn được yêu thương trọn vẹn, giữ mãi nụ cười tỏa nắng, tâm hồn bình yên và hạnh phúc ngập tràn trong từng khoảnh khắc.";
+
+    let customState = {
+      to: DEFAULT_RECIPIENT,
+      from: "",
+      wish: ""
+    };
+
+    function readUrlParams() {
+      const params = new URLSearchParams(window.location.search);
+      const toParam = params.get('to') || params.get('name');
+      const fromParam = params.get('from');
+      const wishParam = params.get('wish');
+
+      if (toParam && toParam.trim()) customState.to = toParam.trim();
+      if (fromParam && fromParam.trim()) customState.from = fromParam.trim();
+      if (wishParam && wishParam.trim()) customState.wish = wishParam.trim();
+
+      applyCustomToUI();
+    }
+
+    function applyCustomToUI() {
+      topRecipientText.textContent = customState.to;
+      finaleRecipientNames.textContent = customState.to;
+
+      if (customState.from) {
+        dedicationTitleLabel.textContent = `Thương gửi từ ${customState.from} đến`;
+      } else {
+        dedicationTitleLabel.textContent = `Thương gửi lời chúc tốt đẹp nhất đến`;
+      }
+
+      finaleCustomWish.textContent = customState.wish || DEFAULT_WISH;
+    }
+
+    function buildShareableUrl() {
+      const baseUrl = window.location.href.split('?')[0];
+      const params = new URLSearchParams();
+      if (inputRecipient.value.trim()) params.set('to', inputRecipient.value.trim());
+      if (inputSender.value.trim()) params.set('from', inputSender.value.trim());
+      if (inputCustomWish.value.trim()) params.set('wish', inputCustomWish.value.trim());
+
+      const query = params.toString();
+      return query ? `${baseUrl}?${query}` : baseUrl;
+    }
+
+    function copyTextSafe(text) {
+      const tempInput = document.createElement('textarea');
+      tempInput.value = text;
+      tempInput.style.position = 'fixed';
+      tempInput.style.opacity = '0';
+      document.body.appendChild(tempInput);
+      tempInput.select();
+      try {
+        document.execCommand('copy');
+        toastStatus.textContent = '✅ Đã áp dụng và sao chép Link gửi tặng thành công!';
+      } catch (err) {
+        toastStatus.textContent = '✨ Đã cập nhật thông tin trên thiệp!';
+      }
+      document.body.removeChild(tempInput);
+    }
+
+    openModalBtn.addEventListener('click', () => {
+      inputRecipient.value = customState.to === DEFAULT_RECIPIENT ? "" : customState.to;
+      inputSender.value = customState.from;
+      inputCustomWish.value = customState.wish;
+      generatedLinkInput.value = buildShareableUrl();
+      toastStatus.textContent = '';
+      shareModal.classList.add('open');
+    });
+
+    closeModalBtn.addEventListener('click', () => shareModal.classList.remove('open'));
+    shareModal.addEventListener('click', (e) => {
+      if (e.target === shareModal) shareModal.classList.remove('open');
+    });
+
+    [inputRecipient, inputSender, inputCustomWish].forEach(inp => {
+      inp.addEventListener('input', () => {
+        generatedLinkInput.value = buildShareableUrl();
+      });
+    });
+
+    applyCustomBtn.addEventListener('click', () => {
+      customState.to = inputRecipient.value.trim() || DEFAULT_RECIPIENT;
+      customState.from = inputSender.value.trim();
+      customState.wish = inputCustomWish.value.trim();
+      applyCustomToUI();
+
+      const shareUrl = buildShareableUrl();
+      generatedLinkInput.value = shareUrl;
+      copyTextSafe(shareUrl);
+    });
+
+    downloadHtmlBtn.addEventListener('click', () => {
+      customState.to = inputRecipient.value.trim() || DEFAULT_RECIPIENT;
+      customState.from = inputSender.value.trim();
+      customState.wish = inputCustomWish.value.trim();
+      applyCustomToUI();
+
+      const htmlContent = document.documentElement.outerHTML;
+      const blob = new Blob(['<!DOCTYPE html>\n' + htmlContent], { type: 'text/html;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Thiep-20-10-${customState.to.replace(/\s+/g, '-')}.html`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      toastStatus.textContent = '📥 Đã tải xuống file thiệp HTML mang tên riêng!';
+    });
+
+    window.onload = function () {
+      readUrlParams();
+      requestAnimationFrame(renderLoop);
+    };
+  </script>
+
+</body></html>
